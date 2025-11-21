@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { restaurantAPI, menuItemAPI } from '../../services/api';
+import { restaurantAPI } from '../../services/api';
 
 // Thunks
 export const fetchRestaurants = createAsyncThunk(
