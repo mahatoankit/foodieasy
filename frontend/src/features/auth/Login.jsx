@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { login, clearError } from './authSlice';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-// import NeonAuthButton from '../../components/auth/NeonAuthButton';
+import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -54,12 +54,20 @@ const Login = () => {
     <div className="min-h-screen bg-light-200 flex">
       {/* Left side - Hero Image/Graphic */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-500 to-primary-700 p-12 items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMCAxMGMyLjIxIDAgNCAxLjc5IDQgNHMtMS43OSA0LTQgNC00LTEuNzktNC00IDEuNzktNCA0LTR6bTAtMTBjMi4yMSAwIDQgMS43OSA0IDRzLTEuNzkgNC00IDQtNC0xLjc5LTQtNCAxLjc5LTQgNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
+        {/* Background Food Image */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        ></div>
         <div className="relative z-10 text-white text-center">
-          <h1 className="text-5xl font-heading font-bold mb-6">
+          <h1 className="text-5xl font-heading font-bold mb-6 drop-shadow-lg">
             Welcome Back!
           </h1>
-          <p className="text-xl text-primary-100 mb-8">
+          <p className="text-xl text-primary-100 mb-8 drop-shadow-md">
             Discover delicious food from the best restaurants in your area
           </p>
           <div className="flex items-center justify-center space-x-8 text-primary-100">
@@ -155,8 +163,6 @@ const Login = () => {
             </Button>
           </form>
 
-          {/* Neon Auth - Temporarily disabled until StackAuthProvider is configured */}
-          {/* 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-light-400"></div>
@@ -167,7 +173,6 @@ const Login = () => {
           </div>
 
           <NeonAuthButton mode="signin" />
-          */}
 
           <p className="text-center text-xs text-dark-600">
             By signing in, you agree to our{' '}

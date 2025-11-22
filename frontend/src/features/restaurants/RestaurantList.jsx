@@ -42,13 +42,23 @@ const RestaurantList = () => {
 
   return (
     <div className="min-h-screen bg-light-200">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+      {/* Hero Section with Background Image */}
+      <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 text-white py-20 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        ></div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
             Discover Amazing Food
           </h1>
-          <p className="text-xl opacity-90 mb-8">
+          <p className="text-xl opacity-90 mb-8 drop-shadow-md">
             Order from the best restaurants in your area
           </p>
           
@@ -102,14 +112,28 @@ const RestaurantList = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {restaurants.map((restaurant) => (
+            {restaurants.map((restaurant, index) => {
+              // Array of food images for variety
+              const foodImages = [
+                'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', // Pizza
+                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', // Salad
+                'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80', // Burger
+                'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&q=80', // Sushi
+                'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80', // Indian
+                'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80', // Thai
+              ];
+              
+              return (
               <Link key={restaurant.id} to={`/restaurants/${restaurant.id}`}>
                 <Card hover className="h-full overflow-hidden">
                   {/* Restaurant Image/Banner */}
-                  <div className="h-48 bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center relative">
-                    <span className="text-white text-5xl font-bold">
-                      {restaurant.name.charAt(0)}
-                    </span>
+                  <div className="h-48 relative overflow-hidden">
+                    <img 
+                      src={foodImages[index % foodImages.length]}
+                      alt={restaurant.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     <div className="absolute top-3 right-3">
                       <Badge variant={restaurant.is_active ? 'success' : 'error'}>
                         {restaurant.is_active ? 'Open' : 'Closed'}
@@ -146,7 +170,8 @@ const RestaurantList = () => {
                   </div>
                 </Card>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

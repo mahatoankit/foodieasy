@@ -5,7 +5,7 @@ import { User, Mail, Phone, Lock, ArrowRight, UserCircle } from 'lucide-react';
 import { register, clearError } from './authSlice';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-// import NeonAuthButton from '../../components/auth/NeonAuthButton';
+import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -57,12 +57,20 @@ const Register = () => {
     <div className="min-h-screen bg-light-200 flex">
       {/* Left side - Hero Image/Graphic */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-12 items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMCAxMGMyLjIxIDAgNCAxLjc5IDQgNHMtMS43OSA0LTQgNC00LTEuNzktNC00IDEuNzktNCA0LTR6bTAtMTBjMi4yMSAwIDQgMS43OSA0IDRzLTEuNzkgNC00IDQtNC0xLjc5LTQtNCAxLjc5LTQgNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
+        {/* Background Food Image */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        ></div>
         <div className="relative z-10 text-white text-center">
-          <h1 className="text-5xl font-heading font-bold mb-6">
+          <h1 className="text-5xl font-heading font-bold mb-6 drop-shadow-lg">
             Join Foodieasy Today!
           </h1>
-          <p className="text-xl text-primary-100 mb-8">
+          <p className="text-xl text-primary-100 mb-8 drop-shadow-md">
             Start ordering delicious food from your favorite restaurants
           </p>
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-left max-w-md mx-auto">
@@ -228,8 +236,6 @@ const Register = () => {
             </Button>
           </form>
 
-          {/* Neon Auth - Temporarily disabled until StackAuthProvider is configured */}
-          {/* 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-light-400"></div>
@@ -240,7 +246,6 @@ const Register = () => {
           </div>
 
           <NeonAuthButton mode="signup" />
-          */}
 
           <p className="text-center text-xs text-dark-600">
             By creating an account, you agree to our{' '}

@@ -162,13 +162,30 @@ const RestaurantDetail = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
+            {filteredItems.map((item, index) => {
+              // Array of food images
+              const foodImages = [
+                'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', // Pizza
+                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', // Salad  
+                'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80', // Burger
+                'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&q=80', // Sushi
+                'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80', // Pasta
+                'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&q=80', // Pizza 2
+                'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400&q=80', // Drink
+                'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80', // Dessert
+              ];
+              
+              return (
               <Card key={item.id} hover className="overflow-hidden">
                 {/* Item Image */}
-                <div className="h-48 bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center relative">
-                  <div className="text-white text-5xl">🍽️</div>
+                <div className="h-48 relative overflow-hidden">
+                  <img 
+                    src={foodImages[index % foodImages.length]}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
                   {!item.is_available && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
                       <span className="text-white font-semibold text-lg">Unavailable</span>
                     </div>
                   )}
@@ -204,7 +221,8 @@ const RestaurantDetail = () => {
                   </Button>
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
