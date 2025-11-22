@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { login, clearError } from './authSlice';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import NeonAuthButton from '../../components/auth/NeonAuthButton';
+// import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -155,6 +155,8 @@ const Login = () => {
             </Button>
           </form>
 
+          {/* Neon Auth - Temporarily disabled until StackAuthProvider is configured */}
+          {/* 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-light-400"></div>
@@ -165,6 +167,7 @@ const Login = () => {
           </div>
 
           <NeonAuthButton mode="signin" />
+          */}
 
           <p className="text-center text-xs text-dark-600">
             By signing in, you agree to our{' '}

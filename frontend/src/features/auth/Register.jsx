@@ -5,7 +5,7 @@ import { User, Mail, Phone, Lock, ArrowRight, UserCircle } from 'lucide-react';
 import { register, clearError } from './authSlice';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import NeonAuthButton from '../../components/auth/NeonAuthButton';
+// import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -228,6 +228,8 @@ const Register = () => {
             </Button>
           </form>
 
+          {/* Neon Auth - Temporarily disabled until StackAuthProvider is configured */}
+          {/* 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-light-400"></div>
@@ -238,6 +240,7 @@ const Register = () => {
           </div>
 
           <NeonAuthButton mode="signup" />
+          */}
 
           <p className="text-center text-xs text-dark-600">
             By creating an account, you agree to our{' '}
