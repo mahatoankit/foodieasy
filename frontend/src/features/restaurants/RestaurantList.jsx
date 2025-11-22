@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Clock, MapPin, Star } from 'lucide-react';
 import { fetchRestaurants } from './restaurantSlice';
+import SearchBar from '../../components/ui/SearchBar';
+import Badge from '../../components/ui/Badge';
+import Card from '../../components/ui/Card';
+import Rating from '../../components/ui/Rating';
 
 const RestaurantList = () => {
   const dispatch = useDispatch();

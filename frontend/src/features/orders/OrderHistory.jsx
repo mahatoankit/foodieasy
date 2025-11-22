@@ -2,6 +2,11 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchMyOrders } from './orderSlice';
+import { Package, Clock, CheckCircle, XCircle, Truck, ChefHat } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import EmptyState from '../../components/ui/EmptyState';
 
 const OrderHistory = () => {
   const dispatch = useDispatch();
@@ -11,16 +16,28 @@ const OrderHistory = () => {
     dispatch(fetchMyOrders());
   }, [dispatch]);
 
-  const getStatusColor = (status) => {
-    const colors = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      PREPARING: 'bg-blue-100 text-blue-800',
-      READY_FOR_PICKUP: 'bg-purple-100 text-purple-800',
-      OUT_FOR_DELIVERY: 'bg-indigo-100 text-indigo-800',
-      DELIVERED: 'bg-green-100 text-green-800',
-      CANCELLED: 'bg-red-100 text-red-800',
+  const getStatusVariant = (status) => {
+    const variants = {
+      PENDING: 'warning',
+      PREPARING: 'info',
+      READY_FOR_PICKUP: 'secondary',
+      OUT_FOR_DELIVERY: 'info',
+      DELIVERED: 'success',
+      CANCELLED: 'error',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return variants[status] || 'secondary';
+  };
+
+  const getStatusIcon = (status) => {
+    const icons = {
+      PENDING: <Clock size={20} />,
+      PREPARING: <ChefHat size={20} />,
+      READY_FOR_PICKUP: <Package size={20} />,
+      OUT_FOR_DELIVERY: <Truck size={20} />,
+      DELIVERED: <CheckCircle size={20} />,
+      CANCELLED: <XCircle size={20} />,
+    };
+    return icons[status] || <Package size={20} />;
   };
 
   if (loading) {
@@ -40,68 +57,119 @@ const OrderHistory = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
+    <div className="min-h-screen bg-light-200 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-dark-900 mb-8">My Orders</h1>
 
-      {orders.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-4">You haven't placed any orders yet</p>
-          <Link
-            to="/restaurants"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-          >
-            Browse Restaurants
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <Link
-              key={order.id}
-              to={`/orders/${order.id}`}
-              className="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Order #{order.id}
-                  </h3>
-                  <p className="text-gray-600">{order.restaurant_name}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(order.created_at).toLocaleString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className={`inline-block px-3 py-1 text-sm font-semibold rounded ${getStatusColor(order.status)}`}>
-                    {order.status_display || order.status}
-                  </span>
-                  <p className="text-xl font-bold text-gray-900 mt-2">
-                    ${parseFloat(order.total_amount).toFixed(2)}
-                  </p>
-                </div>
-              </div>
+        {orders.length === 0 ? (
+          <EmptyState
+            icon={<Package size={64} />}
+            title="No Orders Yet"
+            description="You haven't placed any orders yet. Start ordering from your favorite restaurants!"
+            actionLabel="Browse Restaurants"
+            onAction={() => window.location.href = '/restaurants'}
+          />
+        ) : (
+          <div className="space-y-6">
+            {orders.map((order, index) => (
+              <Card key={order.id} hover className="relative">
+                {/* Timeline connector */}
+                {index !== orders.length - 1 && (
+                  <div className="absolute left-8 top-full w-0.5 h-6 bg-gray-200 z-0"></div>
+                )}
+                
+                <div className="flex gap-4">
+                  {/* Status Icon */}
+                  <div className="flex-shrink-0 relative z-10">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                      order.status === 'DELIVERED' ? 'bg-green-100 text-green-600' :
+                      order.status === 'CANCELLED' ? 'bg-red-100 text-red-600' :
+                      'bg-primary-100 text-primary-600'
+                    }`}>
+                      {getStatusIcon(order.status)}
+                    </div>
+                  </div>
 
-              <div className="border-t pt-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  {order.item_count} item{order.item_count !== 1 ? 's' : ''}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {order.items && order.items.slice(0, 3).map((item) => (
-                    <span key={item.id} className="text-sm text-gray-700">
-                      {item.quantity}× {item.menu_item_name}
-                    </span>
-                  ))}
-                  {order.items && order.items.length > 3 && (
-                    <span className="text-sm text-gray-500">
-                      +{order.items.length - 3} more
-                    </span>
-                  )}
+                  {/* Order Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-xl font-bold text-dark-900">
+                            Order #{order.id}
+                          </h3>
+                          <Badge variant={getStatusVariant(order.status)}>
+                            {order.status_display || order.status.replace(/_/g, ' ')}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 font-medium">{order.restaurant_name}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(order.created_at).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-primary-600">
+                          ${parseFloat(order.total_amount).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Items */}
+                    <div className="border-t border-gray-200 pt-3 mb-4">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">
+                        {order.item_count} item{order.item_count !== 1 ? 's' : ''}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {order.items && order.items.slice(0, 3).map((item) => (
+                          <span key={item.id} className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-700">
+                            {item.quantity}× {item.menu_item_name}
+                          </span>
+                        ))}
+                        {order.items && order.items.length > 3 && (
+                          <span className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">
+                            +{order.items.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-3">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        as={Link}
+                        to={`/orders/${order.id}`}
+                      >
+                        View Details
+                      </Button>
+                      {order.status === 'DELIVERED' && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // TODO: Implement reorder functionality
+                            alert('Reorder functionality coming soon!');
+                          }}
+                        >
+                          Reorder
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { login, clearError } from './authSlice';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -47,72 +51,128 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to Foodieasy
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-              create a new account
-            </Link>
+    <div className="min-h-screen bg-light-200 flex">
+      {/* Left side - Hero Image/Graphic */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-500 to-primary-700 p-12 items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMCAxMGMyLjIxIDAgNCAxLjc5IDQgNHMtMS43OSA0LTQgNC00LTEuNzktNC00IDEuNzktNCA0LTR6bTAtMTBjMi4yMSAwIDQgMS43OSA0IDRzLTEuNzkgNC00IDQtNC0xLjc5LTQtNCAxLjc5LTQgNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
+        <div className="relative z-10 text-white text-center">
+          <h1 className="text-5xl font-heading font-bold mb-6">
+            Welcome Back!
+          </h1>
+          <p className="text-xl text-primary-100 mb-8">
+            Discover delicious food from the best restaurants in your area
           </p>
+          <div className="flex items-center justify-center space-x-8 text-primary-100">
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1">500+</div>
+              <div className="text-sm">Restaurants</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1">10K+</div>
+              <div className="text-sm">Happy Customers</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1">30min</div>
+              <div className="text-sm">Avg Delivery</div>
+            </div>
+          </div>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+      </div>
+
+      {/* Right side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-heading font-bold text-dark-900 mb-2">
+              Sign in
+            </h2>
+            <p className="text-dark-600">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-primary-600 hover:text-primary-700 font-semibold">
+                Sign up
+              </Link>
+            </p>
+          </div>
+
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">
                 {typeof error === 'string' ? error : error.detail || 'Login failed. Please check your credentials.'}
-              </div>
+              </p>
             </div>
           )}
-          
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              label="Email Address"
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              icon={<Mail className="w-5 h-5" />}
+              iconPosition="left"
+            />
+
+            <Input
+              label="Password"
+              id="password"
+              name="password"
+              type="password"
+              required
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              icon={<Lock className="w-5 h-5" />}
+              iconPosition="left"
+            />
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <span className="ml-2 text-sm text-dark-600">Remember me</span>
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
+              <a href="#" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                Forgot password?
+              </a>
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              className="w-full"
+              icon={<ArrowRight className="w-5 h-5" />}
+              iconPosition="right"
+            >
+              {loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-light-400"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-light-200 text-dark-600">Or continue with</span>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
+          <NeonAuthButton mode="signin" />
+
+          <p className="text-center text-xs text-dark-600">
+            By signing in, you agree to our{' '}
+            <a href="#" className="text-primary-600 hover:text-primary-700">Terms of Service</a>
+            {' '}and{' '}
+            <a href="#" className="text-primary-600 hover:text-primary-700">Privacy Policy</a>
+          </p>
+        </div>
       </div>
     </div>
   );
