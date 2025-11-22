@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { 
   Store, 
   Package, 
@@ -9,75 +9,41 @@ import {
   Edit2,
   Trash2,
   CheckCircle,
-  XCircle,
-  AlertCircle
+  XCircle
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import MenuItemModal from './MenuItemModal';
+import CreateRestaurantModal from './CreateRestaurantModal';
+import { fetchMyRestaurant, createRestaurant } from './restaurantSlice';
+import { fetchRestaurantOrders, updateOrderStatus } from './ownerOrdersSlice';
+import { fetchMyMenu, createMenuItem, updateMenuItem, deleteMenuItem } from '../menu/menuSlice';
 
 const OwnerDashboard = () => {
-  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('overview');
-  const [orders, setOrders] = useState([]);
-  const [menuItems, setMenuItems] = useState([]);
-  const [restaurant, setRestaurant] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [createRestaurantModalOpen, setCreateRestaurantModalOpen] = useState(false);
 
-  // Mock data for demonstration
+  // Redux state
+  const { data: restaurant, loading: restaurantLoading, updateLoading } = useSelector(state => state.ownerRestaurant);
+  const { orders, loading: ordersLoading } = useSelector(state => state.ownerOrders);
+  const { items: menuItems, loading: menuLoading, actionLoading } = useSelector(state => state.menu);
+
+  // Fetch data on mount
   useEffect(() => {
-    // TODO: Replace with actual API calls
-    setTimeout(() => {
-      setRestaurant({
-        id: 1,
-        name: 'Your Restaurant Name',
-        address: '123 Food Street',
-        cuisine: 'Italian',
-        delivery_time: '30-45 mins',
-        is_open: true
-      });
+    dispatch(fetchMyRestaurant());
+    dispatch(fetchMyMenu());
+  }, [dispatch]);
 
-      setOrders([
-        {
-          id: 1,
-          customer_name: 'John Doe',
-          items: ['Margherita Pizza', 'Caesar Salad'],
-          total: 32.99,
-          status: 'PENDING',
-          created_at: '2024-01-15T10:30:00Z'
-        },
-        {
-          id: 2,
-          customer_name: 'Jane Smith',
-          items: ['Pasta Carbonara'],
-          total: 18.50,
-          status: 'PREPARING',
-          created_at: '2024-01-15T10:45:00Z'
-        }
-      ]);
-
-      setMenuItems([
-        {
-          id: 1,
-          name: 'Margherita Pizza',
-          category: 'Pizza',
-          price: 15.99,
-          description: 'Classic tomato and mozzarella',
-          available: true
-        },
-        {
-          id: 2,
-          name: 'Caesar Salad',
-          category: 'Salads',
-          price: 12.99,
-          description: 'Fresh romaine with caesar dressing',
-          available: true
-        }
-      ]);
-
-      setLoading(false);
-    }, 500);
-  }, []);
+  // Fetch orders when restaurant is loaded
+  useEffect(() => {
+    if (restaurant?.id) {
+      dispatch(fetchRestaurantOrders(restaurant.id));
+    }
+  }, [dispatch, restaurant?.id]);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -91,31 +57,103 @@ const OwnerDashboard = () => {
   };
 
   const handleStatusUpdate = (orderId, newStatus) => {
-    // TODO: Implement API call to update order status
-    console.log(`Updating order ${orderId} to ${newStatus}`);
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+    dispatch(updateOrderStatus({ orderId, status: newStatus }));
   };
+
+  const handleAddMenuItem = () => {
+    setEditingItem(null);
+    setModalOpen(true);
+  };
+
+  const handleEditMenuItem = (item) => {
+    setEditingItem(item);
+    setModalOpen(true);
+  };
+
+  const handleDeleteMenuItem = (itemId) => {
+    if (window.confirm('Are you sure you want to delete this menu item?')) {
+      dispatch(deleteMenuItem(itemId));
+    }
+  };
+
+  const handleModalSubmit = (formData) => {
+    if (editingItem) {
+      dispatch(updateMenuItem({ id: editingItem.id, data: formData }))
+        .unwrap()
+        .then(() => {
+          setModalOpen(false);
+          setEditingItem(null);
+        })
+        .catch((error) => {
+          console.error('Failed to update menu item:', error);
+        });
+    } else {
+      dispatch(createMenuItem(formData))
+        .unwrap()
+        .then(() => {
+          setModalOpen(false);
+        })
+        .catch((error) => {
+          console.error('Failed to create menu item:', error);
+        });
+    }
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setEditingItem(null);
+  };
+
+  const handleCreateRestaurant = () => {
+    setCreateRestaurantModalOpen(true);
+  };
+
+  const handleCreateRestaurantSubmit = (formData) => {
+    dispatch(createRestaurant(formData))
+      .unwrap()
+      .then(() => {
+        setCreateRestaurantModalOpen(false);
+        // Refresh restaurant data
+        dispatch(fetchMyRestaurant());
+      })
+      .catch((error) => {
+        console.error('Failed to create restaurant:', error);
+        alert(error?.message || 'Failed to create restaurant. Please try again.');
+      });
+  };
+
+  const handleCreateRestaurantClose = () => {
+    setCreateRestaurantModalOpen(false);
+  };
+
+  // Calculate today's stats
+  const todayOrders = orders.filter(order => {
+    const orderDate = new Date(order.created_at);
+    const today = new Date();
+    return orderDate.toDateString() === today.toDateString();
+  });
+
+  const todayRevenue = todayOrders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
+  const pendingCount = orders.filter(o => o.status === 'PENDING').length;
 
   const stats = [
     {
       label: 'Today\'s Orders',
-      value: '12',
+      value: todayOrders.length,
       icon: Package,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50'
     },
     {
       label: 'Pending Orders',
-      value: orders.filter(o => o.status === 'PENDING').length,
+      value: pendingCount,
       icon: Clock,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50'
     },
     {
       label: 'Today\'s Revenue',
-      value: '$456.80',
+      value: `$${todayRevenue.toFixed(2)}`,
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
@@ -128,6 +166,8 @@ const OwnerDashboard = () => {
       bgColor: 'bg-blue-50'
     }
   ];
+
+  const loading = restaurantLoading || ordersLoading || menuLoading;
 
   if (loading) {
     return (
@@ -145,7 +185,7 @@ const OwnerDashboard = () => {
           Restaurant Dashboard
         </h1>
         <p className="text-dark-600">
-          Welcome back, {restaurant?.name}
+          Welcome back{restaurant?.name ? `, ${restaurant.name}` : ''}!
         </p>
       </div>
 
@@ -192,26 +232,40 @@ const OwnerDashboard = () => {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Restaurant Status */}
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-dark-900">Restaurant Status</h2>
-              <Badge variant={restaurant.is_open ? 'success' : 'error'}>
-                {restaurant.is_open ? 'Open' : 'Closed'}
-              </Badge>
-            </div>
-            <div className="space-y-2 text-dark-600">
-              <p><strong>Name:</strong> {restaurant.name}</p>
-              <p><strong>Address:</strong> {restaurant.address}</p>
-              <p><strong>Cuisine:</strong> {restaurant.cuisine}</p>
-              <p><strong>Delivery Time:</strong> {restaurant.delivery_time}</p>
-            </div>
-            <div className="mt-4">
-              <Button variant="secondary" size="sm">
-                <Edit2 className="w-4 h-4" />
-                Edit Restaurant Profile
-              </Button>
-            </div>
-          </Card>
+          {restaurant ? (
+            <Card>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-dark-900">Restaurant Status</h2>
+                <Badge variant={restaurant.is_open ? 'success' : 'error'}>
+                  {restaurant.is_open ? 'Open' : 'Closed'}
+                </Badge>
+              </div>
+              <div className="space-y-2 text-dark-600">
+                <p><strong>Name:</strong> {restaurant.name}</p>
+                <p><strong>Address:</strong> {restaurant.address}</p>
+                <p><strong>Cuisine:</strong> {restaurant.cuisine_type || 'N/A'}</p>
+                <p><strong>Delivery Time:</strong> {restaurant.delivery_time || 'N/A'}</p>
+              </div>
+              <div className="mt-4">
+                <Button variant="secondary" size="sm">
+                  <Edit2 className="w-4 h-4" />
+                  Edit Restaurant Profile
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <Card>
+              <div className="text-center py-8">
+                <Store className="w-12 h-12 text-dark-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-dark-900 mb-2">No Restaurant Found</h3>
+                <p className="text-dark-600 mb-4">You need to create a restaurant first.</p>
+                <Button variant="primary" size="sm" onClick={handleCreateRestaurant}>
+                  <Plus className="w-4 h-4" />
+                  Create Restaurant
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Recent Orders Preview */}
           <Card>
@@ -227,16 +281,16 @@ const OwnerDashboard = () => {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="font-semibold text-dark-900">Order #{order.id}</p>
-                      <p className="text-sm text-dark-600">{order.customer_name}</p>
+                      <p className="text-sm text-dark-600">{order.customer?.email || 'Customer'}</p>
                     </div>
                     <Badge variant={getStatusColor(order.status)}>
                       {order.status}
                     </Badge>
                   </div>
                   <p className="text-sm text-dark-700 mb-2">
-                    {order.items.join(', ')}
+                    {order.items?.length || 0} item(s)
                   </p>
-                  <p className="font-bold text-primary-600">${order.total}</p>
+                  <p className="font-bold text-primary-600">${order.total_amount}</p>
                 </div>
               ))}
             </div>
@@ -270,14 +324,14 @@ const OwnerDashboard = () => {
                           {order.status}
                         </Badge>
                       </div>
-                      <p className="text-dark-600 mb-1">Customer: {order.customer_name}</p>
-                      <p className="text-dark-700 mb-2">{order.items.join(', ')}</p>
+                      <p className="text-dark-600 mb-1">Customer: {order.customer?.email || 'Customer'}</p>
+                      <p className="text-dark-700 mb-2">{order.items?.length || 0} item(s)</p>
                       <p className="text-sm text-dark-500">
                         {new Date(order.created_at).toLocaleString()}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-3">
-                      <p className="text-2xl font-bold text-primary-600">${order.total}</p>
+                      <p className="text-2xl font-bold text-primary-600">${order.total_amount}</p>
                       {order.status === 'PENDING' && (
                         <div className="flex gap-2">
                           <Button
@@ -319,7 +373,7 @@ const OwnerDashboard = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-dark-900">Menu Management</h2>
-            <Button>
+            <Button onClick={handleAddMenuItem}>
               <Plus className="w-4 h-4" />
               Add Menu Item
             </Button>
@@ -342,10 +396,10 @@ const OwnerDashboard = () => {
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-bold text-primary-600">${item.price}</p>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleEditMenuItem(item)}>
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteMenuItem(item.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -355,6 +409,23 @@ const OwnerDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Menu Item Modal */}
+      <MenuItemModal
+        isOpen={modalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleModalSubmit}
+        initialData={editingItem}
+        loading={actionLoading}
+      />
+
+      {/* Create Restaurant Modal */}
+      <CreateRestaurantModal
+        isOpen={createRestaurantModalOpen}
+        onClose={handleCreateRestaurantClose}
+        onSubmit={handleCreateRestaurantSubmit}
+        loading={updateLoading}
+      />
     </div>
   );
 };

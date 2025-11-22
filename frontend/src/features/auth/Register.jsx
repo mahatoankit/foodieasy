@@ -236,6 +236,7 @@ const Register = () => {
             </Button>
           </form>
 
+          {/* OAuth temporarily disabled
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-light-400"></div>
@@ -246,12 +247,13 @@ const Register = () => {
           </div>
 
           <NeonAuthButton mode="signup" />
+          */}
 
           <p className="text-center text-xs text-dark-600">
             By creating an account, you agree to our{' '}
-            <a href="#" className="text-primary-600 hover:text-primary-700">Terms of Service</a>
+            <button type="button" className="text-primary-600 hover:text-primary-700">Terms of Service</button>
             {' '}and{' '}
-            <a href="#" className="text-primary-600 hover:text-primary-700">Privacy Policy</a>
+            <button type="button" className="text-primary-600 hover:text-primary-700">Privacy Policy</button>
           </p>
         </div>
       </div>

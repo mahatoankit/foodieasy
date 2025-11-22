@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './app/store';
-import StackAuthProvider from './components/auth/StackAuthProvider';
+// import StackAuthProvider from './components/auth/StackAuthProvider';
 
 // Layout
 import Navbar from './components/Layout/Navbar';
@@ -25,16 +25,19 @@ import OrderHistory from './features/orders/OrderHistory';
 import OwnerDashboard from './features/owner/OwnerDashboard';
 import RiderDashboard from './features/rider/RiderDashboard';
 
+// Debug
+import AuthDebug from './components/auth/AuthDebug';
+
 import './App.css';
 
 function App() {
   return (
     <Provider store={store}>
-      <StackAuthProvider>
-        <Router>
-          <div className="App min-h-screen bg-gray-50">
-            <Navbar />
-            <Routes>
+      <Router>
+        <div className="App min-h-screen bg-gray-50">
+          <Navbar />
+          <AuthDebug />
+          <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Navigate to="/restaurants" replace />} />
             <Route path="/login" element={<Login />} />
@@ -93,7 +96,6 @@ function App() {
           </Routes>
         </div>
       </Router>
-      </StackAuthProvider>
     </Provider>
   );
 }

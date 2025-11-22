@@ -1,26 +1,19 @@
 import React from 'react';
-import { useStackApp, useUser } from '@stackframe/stack';
 import Button from '../ui/Button';
 
 const NeonAuthButton = ({ mode = 'signin', className = '' }) => {
-  const app = useStackApp();
-  const user = useUser();
+  // Check if Stack Auth is configured
+  const isConfigured = process.env.REACT_APP_STACK_PROJECT_ID && 
+                       process.env.REACT_APP_STACK_PUBLISHABLE_CLIENT_KEY;
+
+  if (!isConfigured) {
+    return null; // Don't render if Stack Auth is not configured
+  }
 
   const handleNeonAuth = async () => {
-    try {
-      if (mode === 'signin') {
-        await app.signInWithOAuth('google'); // Neon Stack supports OAuth providers
-      } else {
-        await app.signUpWithOAuth('google');
-      }
-    } catch (error) {
-      console.error('Neon auth error:', error);
-    }
+    console.log('OAuth authentication would happen here');
+    alert('OAuth authentication requires Stack Auth configuration. Using email/password login instead.');
   };
-
-  if (user) {
-    return null; // Already authenticated
-  }
 
   return (
     <Button

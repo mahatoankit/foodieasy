@@ -39,7 +39,7 @@ api.interceptors.response.use(
         
         if (refreshToken) {
           const response = await axios.post(
-            `${process.env.REACT_APP_API_BASE_URL}/users/auth/token/refresh/`,
+            `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api'}/users/auth/token/refresh/`,
             { refresh: refreshToken }
           );
 

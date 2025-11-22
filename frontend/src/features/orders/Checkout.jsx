@@ -24,6 +24,14 @@ const Checkout = () => {
       return;
     }
 
+    // Check if user is authenticated
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      alert('Please login to place an order');
+      navigate('/login');
+      return;
+    }
+
     const orderData = {
       restaurant: restaurant.id,
       delivery_address: deliveryAddress,
@@ -33,12 +41,16 @@ const Checkout = () => {
       }))
     };
 
+    console.log('Placing order:', orderData);
+    console.log('Auth token exists:', !!token);
+
     try {
       const result = await dispatch(createOrder(orderData)).unwrap();
       dispatch(clearCart());
       navigate(`/orders/${result.id}`);
     } catch (err) {
       console.error('Order failed:', err);
+      alert(err?.detail || err?.message || 'Failed to place order. Please try again.');
     }
   };
 

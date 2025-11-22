@@ -61,7 +61,7 @@ const OrderHistory = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-dark-900 mb-8">My Orders</h1>
 
-        {orders.length === 0 ? (
+        {!orders || orders.length === 0 ? (
           <EmptyState
             icon={<Package size={64} />}
             title="No Orders Yet"
@@ -71,7 +71,7 @@ const OrderHistory = () => {
           />
         ) : (
           <div className="space-y-6">
-            {orders.map((order, index) => (
+            {orders.filter(order => order && order.id).map((order, index) => (
               <Card key={order.id} hover className="relative">
                 {/* Timeline connector */}
                 {index !== orders.length - 1 && (
@@ -86,7 +86,7 @@ const OrderHistory = () => {
                       order.status === 'CANCELLED' ? 'bg-red-100 text-red-600' :
                       'bg-primary-100 text-primary-600'
                     }`}>
-                      {getStatusIcon(order.status)}
+                      {getStatusIcon(order.status || 'PENDING')}
                     </div>
                   </div>
 
@@ -99,23 +99,23 @@ const OrderHistory = () => {
                             Order #{order.id}
                           </h3>
                           <Badge variant={getStatusVariant(order.status)}>
-                            {order.status_display || order.status.replace(/_/g, ' ')}
+                            {order.status_display || (order.status ? order.status.replace(/_/g, ' ') : 'Unknown')}
                           </Badge>
                         </div>
-                        <p className="text-gray-600 font-medium">{order.restaurant_name}</p>
+                        <p className="text-gray-600 font-medium">{order.restaurant_name || 'Restaurant'}</p>
                         <p className="text-sm text-gray-500 mt-1">
-                          {new Date(order.created_at).toLocaleString('en-US', {
+                          {order.created_at ? new Date(order.created_at).toLocaleString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
-                          })}
+                          }) : 'Date unavailable'}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-primary-600">
-                          ${parseFloat(order.total_amount).toFixed(2)}
+                          ${order.total_amount ? parseFloat(order.total_amount).toFixed(2) : '0.00'}
                         </p>
                       </div>
                     </div>
@@ -123,7 +123,7 @@ const OrderHistory = () => {
                     {/* Items */}
                     <div className="border-t border-gray-200 pt-3 mb-4">
                       <p className="text-sm text-gray-600 mb-2 font-medium">
-                        {order.item_count} item{order.item_count !== 1 ? 's' : ''}
+                        {order.item_count || 0} item{order.item_count !== 1 ? 's' : ''}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {order.items && order.items.slice(0, 3).map((item) => (

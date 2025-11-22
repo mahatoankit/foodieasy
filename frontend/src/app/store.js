@@ -3,6 +3,9 @@ import authReducer from '../features/auth/authSlice';
 import restaurantReducer from '../features/restaurants/restaurantSlice';
 import cartReducer from '../features/cart/cartSlice';
 import orderReducer from '../features/orders/orderSlice';
+import menuReducer from '../features/menu/menuSlice';
+import ownerRestaurantReducer from '../features/owner/restaurantSlice';
+import ownerOrdersReducer from '../features/owner/ownerOrdersSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +13,9 @@ export const store = configureStore({
     restaurants: restaurantReducer,
     cart: cartReducer,
     orders: orderReducer,
+    menu: menuReducer,
+    ownerRestaurant: ownerRestaurantReducer,
+    ownerOrders: ownerOrdersReducer,
   },
 });
 
