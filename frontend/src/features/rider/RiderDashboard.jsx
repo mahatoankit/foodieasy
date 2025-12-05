@@ -142,7 +142,7 @@ const RiderDashboard = () => {
     },
     {
       label: 'Today\'s Earnings',
-      value: `$${completedDeliveries.reduce((sum, d) => sum + d.delivery_fee, 0).toFixed(2)}`,
+      value: `NPR ${completedDeliveries.reduce((sum, d) => sum + d.delivery_fee, 0).toFixed(0)}`,
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50'

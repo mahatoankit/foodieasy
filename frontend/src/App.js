@@ -2,10 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './app/store';
+import ToastProvider from './components/ui/ToastProvider';
 // import StackAuthProvider from './components/auth/StackAuthProvider';
 
 // Layout
 import Navbar from './components/Layout/Navbar';
+import Footer from './components/Layout/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Auth
@@ -20,24 +22,25 @@ import RestaurantDetail from './features/restaurants/RestaurantDetail';
 import Cart from './features/cart/Cart';
 import Checkout from './features/orders/Checkout';
 import OrderHistory from './features/orders/OrderHistory';
+import OrderDetail from './features/orders/OrderDetail';
+
+// Profile
+import Profile from './features/profile/Profile';
 
 // Dashboards
 import OwnerDashboard from './features/owner/OwnerDashboard';
 import RiderDashboard from './features/rider/RiderDashboard';
-
-// Debug
-import AuthDebug from './components/auth/AuthDebug';
 
 import './App.css';
 
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <div className="App min-h-screen bg-gray-50">
-          <Navbar />
-          <AuthDebug />
-          <Routes>
+      <ToastProvider>
+        <Router>
+          <div className="App min-h-screen bg-gray-50">
+            <Navbar />
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Navigate to="/restaurants" replace />} />
             <Route path="/login" element={<Login />} />
@@ -70,6 +73,24 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/orders/:id"
+              element={
+                <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                  <OrderDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Profile - All authenticated users */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute allowedRoles={['CUSTOMER', 'RESTAURANT_OWNER', 'RIDER']}>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Restaurant Owner Dashboard */}
             <Route
@@ -94,8 +115,10 @@ function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/restaurants" replace />} />
           </Routes>
+          <Footer />
         </div>
       </Router>
+      </ToastProvider>
     </Provider>
   );
 }

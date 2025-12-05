@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { createOrder } from '../orders/orderSlice';
 import { clearCart } from '../cart/cartSlice';
 import { MapPin, CreditCard, ShoppingBag, CheckCircle } from 'lucide-react';
@@ -19,7 +20,7 @@ const Checkout = () => {
     e.preventDefault();
     
     if (!restaurant || items.length === 0) {
-      alert('Your cart is empty');
+      toast.error('Your cart is empty');
       navigate('/cart');
       return;
     }
@@ -27,7 +28,7 @@ const Checkout = () => {
     // Check if user is authenticated
     const token = localStorage.getItem('access_token');
     if (!token) {
-      alert('Please login to place an order');
+      toast.error('Please login to place an order');
       navigate('/login');
       return;
     }
@@ -46,11 +47,16 @@ const Checkout = () => {
 
     try {
       const result = await dispatch(createOrder(orderData)).unwrap();
+      toast.success('Order placed successfully!', {
+        duration: 4000,
+      });
       dispatch(clearCart());
       navigate(`/orders/${result.id}`);
     } catch (err) {
       console.error('Order failed:', err);
-      alert(err?.detail || err?.message || 'Failed to place order. Please try again.');
+      toast.error(err?.detail || err?.message || 'Failed to place order. Please try again.', {
+        duration: 4000,
+      });
     }
   };
 
@@ -202,11 +208,11 @@ const Checkout = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-dark-900 truncate">{item.name}</p>
                       <p className="text-sm text-gray-600">
-                        ${parseFloat(item.price).toFixed(2)} × {item.quantity}
+                        NPR {parseFloat(item.price).toFixed(0)} × {item.quantity}
                       </p>
                     </div>
                     <p className="font-semibold text-dark-900 flex-shrink-0">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      NPR {(item.price * item.quantity).toFixed(0)}
                     </p>
                   </div>
                 ))}
@@ -215,21 +221,21 @@ const Checkout = () => {
               <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>NPR {total.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Fee</span>
-                  <span>${deliveryFee.toFixed(2)}</span>
+                  <span>NPR {deliveryFee.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Service Fee</span>
-                  <span>${serviceFee.toFixed(2)}</span>
+                  <span>NPR {serviceFee.toFixed(0)}</span>
                 </div>
               </div>
 
               <div className="flex justify-between items-center text-xl font-bold text-dark-900">
                 <span>Total</span>
-                <span>${grandTotal.toFixed(2)}</span>
+                <span>NPR {grandTotal.toFixed(0)}</span>
               </div>
             </Card>
           </div>

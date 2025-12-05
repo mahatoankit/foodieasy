@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { User, Mail, Phone, Lock, ArrowRight, UserCircle } from 'lucide-react';
 import { register, clearError } from './authSlice';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -46,7 +46,7 @@ const Register = () => {
     
     // Validate passwords match
     if (formData.password !== formData.password2) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
 

@@ -7,7 +7,7 @@
 
 # testing
 /coverage
-
+backend/test_login.py
 # production
 /build
 

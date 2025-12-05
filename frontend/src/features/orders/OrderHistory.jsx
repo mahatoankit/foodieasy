@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { fetchMyOrders } from './orderSlice';
-import { Package, Clock, CheckCircle, XCircle, Truck, ChefHat } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, Truck, ChefHat, Eye, RefreshCw } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -115,7 +116,7 @@ const OrderHistory = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-primary-600">
-                          ${order.total_amount ? parseFloat(order.total_amount).toFixed(2) : '0.00'}
+                          NPR {order.total_amount ? parseFloat(order.total_amount).toFixed(0) : '0'}
                         </p>
                       </div>
                     </div>
@@ -141,22 +142,24 @@ const OrderHistory = () => {
 
                     {/* Actions */}
                     <div className="flex gap-3">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        as={Link}
-                        to={`/orders/${order.id}`}
-                      >
-                        View Details
-                      </Button>
+                      <Link to={`/orders/${order.id}`}>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          icon={<Eye size={16} />}
+                        >
+                          View Details
+                        </Button>
+                      </Link>
                       {order.status === 'DELIVERED' && (
                         <Button
                           variant="secondary"
                           size="sm"
+                          icon={<RefreshCw size={16} />}
                           onClick={(e) => {
                             e.preventDefault();
                             // TODO: Implement reorder functionality
-                            alert('Reorder functionality coming soon!');
+                            toast.info('Reorder functionality coming soon!');
                           }}
                         >
                           Reorder

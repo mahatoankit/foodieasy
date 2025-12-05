@@ -5,7 +5,6 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { login, clearError } from './authSlice';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import NeonAuthButton from '../../components/auth/NeonAuthButton';
 
 const Login = () => {
   const dispatch = useDispatch();

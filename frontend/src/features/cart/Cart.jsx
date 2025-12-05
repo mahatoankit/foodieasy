@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { removeFromCart, updateQuantity, clearCart } from './cartSlice';
-import { ShoppingCart, Plus, Minus, Trash2, X } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, X } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import EmptyState from '../../components/ui/EmptyState';
@@ -24,7 +25,7 @@ const Cart = () => {
 
   const handleCheckout = () => {
     if (!user) {
-      alert('Please login to checkout');
+      toast.error('Please login to checkout');
       navigate('/login');
       return;
     }
@@ -84,7 +85,7 @@ const Cart = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-lg font-semibold text-dark-900">{item.name}</h3>
-                        <p className="text-sm text-gray-600">${parseFloat(item.price).toFixed(2)} each</p>
+                        <p className="text-sm text-gray-600">NPR {parseFloat(item.price).toFixed(0)} each</p>
                       </div>
                       <button
                         onClick={() => handleRemoveItem(item.menu_item)}

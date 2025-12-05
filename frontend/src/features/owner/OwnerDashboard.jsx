@@ -153,7 +153,7 @@ const OwnerDashboard = () => {
     },
     {
       label: 'Today\'s Revenue',
-      value: `$${todayRevenue.toFixed(2)}`,
+      value: `NPR ${todayRevenue.toFixed(0)}`,
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50'

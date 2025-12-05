@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin, ChefHat } from 'lucide-react';
 import { fetchRestaurants } from './restaurantSlice';
 import SearchBar from '../../components/ui/SearchBar';
 import Badge from '../../components/ui/Badge';
@@ -54,7 +54,7 @@ const RestaurantList = () => {
           }}
         ></div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
             Discover Amazing Food
           </h1>
@@ -62,8 +62,8 @@ const RestaurantList = () => {
             Order from the best restaurants in your area
           </p>
           
-          {/* Search Bar */}
-          <div className="max-w-2xl">
+          {/* Search Bar - Centered */}
+          <div className="max-w-2xl mx-auto">
             <SearchBar
               value={search}
               onChange={setSearch}
@@ -157,7 +157,7 @@ const RestaurantList = () => {
                       {restaurant.description}
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                       <div className="flex items-center gap-1">
                         <Clock size={16} />
                         <span>25-35 min</span>
@@ -167,6 +167,12 @@ const RestaurantList = () => {
                         <span className="truncate">{restaurant.address.split(',')[0]}</span>
                       </div>
                     </div>
+                    
+                    {/* View Menu Button */}
+                    <button className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                      <ChefHat size={18} />
+                      View Menu
+                    </button>
                   </div>
                 </Card>
               </Link>

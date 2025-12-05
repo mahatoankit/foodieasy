@@ -132,6 +132,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 order.cancelled_at = timezone.now()
                 order.cancellation_reason = cancellation_reason
             
+            # Save without specifying update_fields to ensure timestamps are saved
             order.save()
             
             return Response(
