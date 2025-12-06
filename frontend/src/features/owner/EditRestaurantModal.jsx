@@ -78,10 +78,12 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-light-300">
-          <h2 className="text-2xl font-bold text-dark-900">Edit Restaurant Profile</h2>
+          <h2 className="text-2xl font-bold text-dark-900">
+            Edit Restaurant Profile
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-light-100 rounded-full transition-colors"
