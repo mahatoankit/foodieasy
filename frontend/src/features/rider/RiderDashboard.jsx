@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { 
   Bike, 
   Package, 
@@ -9,7 +10,8 @@ import {
   CheckCircle,
   Navigation,
   Phone,
-  AlertCircle
+  AlertCircle,
+  Truck
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -23,105 +25,137 @@ const RiderDashboard = () => {
   const [completedDeliveries, setCompletedDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
+  // Fetch real data from API
   useEffect(() => {
-    // TODO: Replace with actual API calls
-    setTimeout(() => {
-      setAvailableOrders([
-        {
-          id: 1,
-          restaurant: 'Pizza Palace',
-          restaurant_address: '123 Main St',
-          customer_name: 'John Doe',
-          customer_address: '456 Oak Ave',
-          customer_phone: '+1 234-567-8900',
-          total: 32.99,
-          delivery_fee: 4.99,
-          distance: '2.5 km',
-          estimated_time: '15 mins'
-        },
-        {
-          id: 2,
-          restaurant: 'Burger House',
-          restaurant_address: '789 Elm St',
-          customer_name: 'Jane Smith',
-          customer_address: '321 Pine Rd',
-          customer_phone: '+1 234-567-8901',
-          total: 24.50,
-          delivery_fee: 3.99,
-          distance: '1.8 km',
-          estimated_time: '12 mins'
-        }
-      ]);
-
-      setActiveDeliveries([
-        {
-          id: 3,
-          restaurant: 'Sushi Bar',
-          restaurant_address: '555 Cedar Ln',
-          customer_name: 'Bob Wilson',
-          customer_address: '888 Maple Dr',
-          customer_phone: '+1 234-567-8902',
-          total: 45.00,
-          delivery_fee: 5.99,
-          status: 'PICKED_UP',
-          pickup_time: '2024-01-15T11:00:00Z'
-        }
-      ]);
-
-      setCompletedDeliveries([
-        {
-          id: 4,
-          restaurant: 'Taco Town',
-          customer_name: 'Alice Brown',
-          total: 18.99,
-          delivery_fee: 3.50,
-          completed_at: '2024-01-15T10:30:00Z',
-          rating: 5
-        },
-        {
-          id: 5,
-          restaurant: 'Pasta Place',
-          customer_name: 'Charlie Davis',
-          total: 28.50,
-          delivery_fee: 4.50,
-          completed_at: '2024-01-15T09:45:00Z',
-          rating: 4
-        }
-      ]);
-
-      setLoading(false);
-    }, 500);
+    fetchOrders();
   }, []);
 
-  const handleAcceptOrder = (orderId) => {
-    // TODO: Implement API call to accept order
-    console.log(`Accepting order ${orderId}`);
-    const order = availableOrders.find(o => o.id === orderId);
-    if (order) {
-      setActiveDeliveries([...activeDeliveries, { ...order, status: 'ACCEPTED' }]);
-      setAvailableOrders(availableOrders.filter(o => o.id !== orderId));
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      // Fetch available orders (READY_FOR_PICKUP)
+      const availableResponse = await fetch('http://localhost:8000/api/orders/pending_orders/', { headers });
+      if (availableResponse.ok) {
+        const availableData = await availableResponse.json();
+        console.log('📦 Available Orders:', availableData);
+        setAvailableOrders(availableData);
+      }
+
+      // Fetch rider's orders (assigned to this rider)
+      const myOrdersResponse = await fetch('http://localhost:8000/api/orders/my_orders/', { headers });
+      if (myOrdersResponse.ok) {
+        const myOrdersData = await myOrdersResponse.json();
+        console.log('🚴 My Orders:', myOrdersData);
+        // Active deliveries: orders assigned to rider that are READY_FOR_PICKUP or OUT_FOR_DELIVERY
+        const active = myOrdersData.filter(o => 
+          o.status === 'READY_FOR_PICKUP' || o.status === 'OUT_FOR_DELIVERY'
+        );
+        const completed = myOrdersData.filter(o => o.status === 'DELIVERED');
+        console.log('✅ Active Deliveries:', active);
+        console.log('📋 Completed Deliveries:', completed);
+        setActiveDeliveries(active);
+        setCompletedDeliveries(completed);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching orders:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePickup = (orderId) => {
-    // TODO: Implement API call to mark as picked up
-    console.log(`Marking order ${orderId} as picked up`);
-    setActiveDeliveries(activeDeliveries.map(order =>
-      order.id === orderId ? { ...order, status: 'PICKED_UP', pickup_time: new Date().toISOString() } : order
-    ));
+  const handleAcceptOrder = async (orderId) => {
+    console.log(`🎯 Accepting Order #${orderId}...`);
+    const loadingToast = toast.loading('Accepting order...');
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/orders/${orderId}/assign_rider/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      console.log('📥 Accept Order Response:', data);
+
+      if (response.ok) {
+        toast.success(`Order #${orderId} accepted! Switching to Active Deliveries...`, { id: loadingToast });
+        console.log('✅ Order accepted, refreshing data...');
+        // Refresh orders after accepting
+        await fetchOrders();
+        // Switch to Active Deliveries tab to show the accepted order
+        console.log('🔄 Switching to Active Deliveries tab');
+        setActiveTab('active');
+      } else {
+        const errorMessage = data.error || 'Failed to accept order';
+        console.error('❌ Failed to accept order:', errorMessage);
+        toast.error(errorMessage, { id: loadingToast });
+      }
+    } catch (error) {
+      console.error('❌ Error accepting order:', error);
+      toast.error('Network error. Please try again.', { id: loadingToast });
+    }
   };
 
-  const handleDeliver = (orderId) => {
-    // TODO: Implement API call to mark as delivered
-    console.log(`Marking order ${orderId} as delivered`);
-    const order = activeDeliveries.find(o => o.id === orderId);
-    if (order) {
-      setCompletedDeliveries([
-        { ...order, completed_at: new Date().toISOString(), rating: null },
-        ...completedDeliveries
-      ]);
-      setActiveDeliveries(activeDeliveries.filter(o => o.id !== orderId));
+  const handlePickup = async (orderId) => {
+    const loadingToast = toast.loading('Marking as picked up...');
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/orders/${orderId}/update_status/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'OUT_FOR_DELIVERY' })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Order picked up! Ready for delivery.', { id: loadingToast });
+        // Refresh orders after pickup
+        fetchOrders();
+      } else {
+        const errorMessage = data.error || 'Failed to update order status';
+        toast.error(errorMessage, { id: loadingToast });
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast.error('Network error. Please try again.', { id: loadingToast });
+    }
+  };
+
+  const handleDeliver = async (orderId) => {
+    const loadingToast = toast.loading('Marking as delivered...');
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/orders/${orderId}/update_status/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'DELIVERED' })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Order delivered successfully! 🎉', { id: loadingToast });
+        // Refresh orders after delivery
+        fetchOrders();
+      } else {
+        const errorMessage = data.error || 'Failed to update order status';
+        toast.error(errorMessage, { id: loadingToast });
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast.error('Network error. Please try again.', { id: loadingToast });
     }
   };
 
@@ -142,7 +176,7 @@ const RiderDashboard = () => {
     },
     {
       label: 'Today\'s Earnings',
-      value: `NPR ${completedDeliveries.reduce((sum, d) => sum + d.delivery_fee, 0).toFixed(0)}`,
+      value: `NPR ${completedDeliveries.length * 50}`,
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
@@ -168,11 +202,11 @@ const RiderDashboard = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-dark-900 mb-2">
-          Rider Dashboard
+        <h1 className="text-4xl font-bold text-dark-900 mb-3">
+          🚴 Rider Dashboard
         </h1>
-        <p className="text-dark-600">
-          Welcome back, {user?.name || 'Rider'}
+        <p className="text-dark-600 text-lg">
+          Welcome back, <span className="font-semibold text-primary-600">{user?.name || 'Rider'}</span>
         </p>
       </div>
 
@@ -181,14 +215,14 @@ const RiderDashboard = () => {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index}>
+            <Card key={index} className="hover:shadow-lg transition-shadow border-2 border-light-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-dark-600 text-sm mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-dark-900">{stat.value}</p>
+                  <p className="text-dark-600 text-sm mb-2 uppercase tracking-wide font-medium">{stat.label}</p>
+                  <p className="text-3xl font-bold text-dark-900">{stat.value}</p>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+                <div className={`p-4 rounded-xl ${stat.bgColor}`}>
+                  <Icon className={`w-8 h-8 ${stat.color}`} />
                 </div>
               </div>
             </Card>
@@ -197,19 +231,19 @@ const RiderDashboard = () => {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 border-b border-light-300">
-        <div className="flex space-x-8">
+      <div className="mb-8 border-b-2 border-light-200">
+        <div className="flex gap-2">
           {['available', 'active', 'history'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 px-2 font-medium capitalize transition-colors ${
+              className={`pb-4 px-6 font-semibold text-base capitalize transition-all rounded-t-lg ${
                 activeTab === tab
-                  ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-dark-600 hover:text-dark-900'
+                  ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
+                  : 'text-dark-600 hover:text-dark-900 hover:bg-light-100'
               }`}
             >
-              {tab === 'available' ? 'Available Orders' : tab === 'active' ? 'Active Deliveries' : 'History'}
+              {tab === 'available' ? '📦 Available Orders' : tab === 'active' ? '🚴 Active Deliveries' : '📋 History'}
             </button>
           ))}
         </div>
@@ -228,63 +262,62 @@ const RiderDashboard = () => {
             </Card>
           ) : (
             availableOrders.map((order) => (
-              <Card key={order.id}>
+              <Card key={order.id} className="hover:shadow-lg transition-shadow border-2 border-light-200 hover:border-primary-300">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-bold text-dark-900">Order #{order.id}</h3>
-                        <Badge variant="warning">New</Badge>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-dark-900">Order #{order.id}</h3>
+                        <Badge variant="warning" className="text-sm">🔥 New Order</Badge>
                       </div>
-                      <p className="text-primary-600 font-semibold">{order.restaurant}</p>
+                      <p className="text-primary-600 font-semibold text-lg">{order.restaurant_name}</p>
+                      <p className="text-dark-600 text-sm mt-1">{order.item_count} item(s)</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-dark-900 mb-1">Pickup From:</p>
+                      <div className="bg-light-50 p-4 rounded-lg">
+                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">📍 Pickup From</p>
                         <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-dark-500 mt-0.5 flex-shrink-0" />
-                          <p className="text-dark-700 text-sm">{order.restaurant_address}</p>
+                          <MapPin className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-dark-700 font-medium">{order.restaurant_name}</p>
                         </div>
                       </div>
 
-                      <div>
-                        <p className="text-sm font-semibold text-dark-900 mb-1">Deliver To:</p>
+                      <div className="bg-light-50 p-4 rounded-lg">
+                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">🚚 Deliver To</p>
                         <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" />
+                          <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                           <div>
-                            <p className="text-dark-700 text-sm">{order.customer_address}</p>
-                            <p className="text-dark-600 text-sm">{order.customer_name}</p>
+                            <p className="text-dark-700 font-medium">{order.delivery_address}</p>
+                            <p className="text-dark-600 text-sm mt-1">{order.customer_name}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex gap-4 text-sm">
-                      <div className="flex items-center gap-1 text-dark-600">
-                        <Navigation className="w-4 h-4" />
-                        <span>{order.distance}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-dark-600">
-                        <Clock className="w-4 h-4" />
-                        <span>{order.estimated_time}</span>
+                    <div className="bg-primary-50 p-4 rounded-lg border border-primary-200">
+                      <p className="text-sm font-semibold text-dark-900 mb-2">Order Details</p>
+                      <div className="space-y-1">
+                        <p className="text-dark-700 text-sm"><span className="font-medium">Total Amount:</span> NPR {Math.round(order.total_amount)}</p>
+                        <p className="text-dark-700 text-sm"><span className="font-medium">Customer:</span> {order.customer_email}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end justify-between lg:w-48">
-                    <div className="text-right">
-                      <p className="text-sm text-dark-600 mb-1">Order Total</p>
-                      <p className="text-2xl font-bold text-dark-900">${order.total}</p>
-                      <p className="text-lg font-semibold text-green-600 mt-1">
-                        Earn ${order.delivery_fee}
-                      </p>
+                  <div className="flex flex-col items-end justify-between lg:w-52 border-l border-light-200 lg:pl-6">
+                    <div className="text-right mb-4 w-full">
+                      <p className="text-sm text-dark-600 mb-1 uppercase tracking-wide">You'll Earn</p>
+                      <p className="text-4xl font-bold text-green-600 mb-2">NPR 50</p>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-sm text-dark-700"><span className="font-medium">Order Total:</span></p>
+                        <p className="text-lg font-bold text-dark-900">NPR {Math.round(order.total_amount)}</p>
+                      </div>
                     </div>
                     <Button
-                      className="w-full"
+                      className="w-full lg:w-48 text-base py-3"
                       onClick={() => handleAcceptOrder(order.id)}
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle className="w-5 h-5 mr-2" />
                       Accept Order
                     </Button>
                   </div>
@@ -308,70 +341,72 @@ const RiderDashboard = () => {
             </Card>
           ) : (
             activeDeliveries.map((order) => (
-              <Card key={order.id}>
+              <Card key={order.id} className="hover:shadow-lg transition-shadow">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-bold text-dark-900">Order #{order.id}</h3>
-                        <Badge variant={order.status === 'PICKED_UP' ? 'info' : 'success'}>
-                          {order.status === 'PICKED_UP' ? 'In Transit' : 'Accepted'}
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-dark-900">Order #{order.id}</h3>
+                        <Badge variant={order.status === 'OUT_FOR_DELIVERY' ? 'info' : 'success'} className="text-sm">
+                          {order.status === 'OUT_FOR_DELIVERY' ? 'In Transit' : 'Ready for Pickup'}
                         </Badge>
                       </div>
-                      <p className="text-primary-600 font-semibold">{order.restaurant}</p>
+                      <p className="text-primary-600 font-semibold text-lg">{order.restaurant_name}</p>
+                      <p className="text-dark-600 text-sm mt-1">{order.item_count} item(s)</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-dark-900 mb-1">
-                          {order.status === 'ACCEPTED' ? 'Pickup From:' : 'Picked Up From:'}
+                      <div className="bg-light-50 p-4 rounded-lg">
+                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">
+                          {order.status === 'READY_FOR_PICKUP' ? '📍 Pickup From' : '✓ Picked Up From'}
                         </p>
                         <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-dark-500 mt-0.5 flex-shrink-0" />
-                          <p className="text-dark-700 text-sm">{order.restaurant_address}</p>
+                          <MapPin className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-dark-700 font-medium">{order.restaurant_name}</p>
                         </div>
                       </div>
 
-                      <div>
-                        <p className="text-sm font-semibold text-dark-900 mb-1">Deliver To:</p>
+                      <div className="bg-light-50 p-4 rounded-lg">
+                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">🚚 Deliver To</p>
                         <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" />
+                          <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                           <div>
-                            <p className="text-dark-700 text-sm">{order.customer_address}</p>
-                            <p className="text-dark-600 text-sm">{order.customer_name}</p>
+                            <p className="text-dark-700 font-medium">{order.delivery_address}</p>
+                            <p className="text-dark-600 text-sm mt-1">{order.customer_name}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 p-3 bg-light-100 rounded-lg">
-                      <Phone className="w-4 h-4 text-primary-600" />
-                      <a href={`tel:${order.customer_phone}`} className="text-primary-600 font-medium">
-                        {order.customer_phone}
-                      </a>
+                    <div className="bg-primary-50 p-4 rounded-lg border border-primary-200">
+                      <p className="text-sm font-semibold text-dark-900 mb-2">Order Details</p>
+                      <div className="space-y-1">
+                        <p className="text-dark-700 text-sm"><span className="font-medium">Total Amount:</span> NPR {Math.round(order.total_amount)}</p>
+                        <p className="text-dark-700 text-sm"><span className="font-medium">Customer:</span> {order.customer_email}</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end justify-between lg:w-48">
-                    <div className="text-right">
-                      <p className="text-sm text-dark-600 mb-1">Delivery Fee</p>
-                      <p className="text-2xl font-bold text-green-600">${order.delivery_fee}</p>
+                  <div className="flex flex-col items-end justify-between lg:w-52 border-l border-light-200 lg:pl-6">
+                    <div className="text-right mb-4 w-full">
+                      <p className="text-sm text-dark-600 mb-1 uppercase tracking-wide">Delivery Fee</p>
+                      <p className="text-3xl font-bold text-green-600">NPR 50</p>
                     </div>
-                    {order.status === 'ACCEPTED' ? (
+                    {order.status === 'READY_FOR_PICKUP' ? (
                       <Button
-                        className="w-full"
+                        className="w-full lg:w-48 text-base py-3"
                         onClick={() => handlePickup(order.id)}
                       >
-                        <Package className="w-4 h-4" />
+                        <Truck className="w-5 h-5 mr-2" />
                         Mark Picked Up
                       </Button>
                     ) : (
                       <Button
-                        className="w-full"
-                        variant="primary"
+                        className="w-full lg:w-48 text-base py-3"
+                        variant="success"
                         onClick={() => handleDeliver(order.id)}
                       >
-                        <CheckCircle className="w-4 h-4" />
+                        <CheckCircle className="w-5 h-5 mr-2" />
                         Mark Delivered
                       </Button>
                     )}
@@ -396,25 +431,33 @@ const RiderDashboard = () => {
             </Card>
           ) : (
             completedDeliveries.map((delivery) => (
-              <Card key={delivery.id}>
-                <div className="flex flex-col md:flex-row justify-between gap-4">
+              <Card key={delivery.id} className="bg-light-50">
+                <div className="flex flex-col md:flex-row justify-between gap-6">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-dark-900">Order #{delivery.id}</h3>
-                      <Badge variant="success">Delivered</Badge>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-xl font-bold text-dark-900">Order #{delivery.id}</h3>
+                      <Badge variant="success" className="text-sm">✓ Delivered</Badge>
                     </div>
-                    <p className="text-dark-700 mb-1">{delivery.restaurant}</p>
-                    <p className="text-sm text-dark-600">Customer: {delivery.customer_name}</p>
-                    <p className="text-sm text-dark-500 mt-2">
-                      {new Date(delivery.completed_at).toLocaleString()}
-                    </p>
+                    <div className="space-y-2">
+                      <p className="text-dark-700 font-semibold text-lg">{delivery.restaurant_name}</p>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-dark-500" />
+                        <p className="text-sm text-dark-600">{delivery.delivery_address}</p>
+                      </div>
+                      <p className="text-sm text-dark-600">Customer: {delivery.customer_name}</p>
+                      <div className="flex items-center gap-2 mt-3 text-sm text-dark-500">
+                        <Clock className="w-4 h-4" />
+                        <p>{new Date(delivery.updated_at).toLocaleString()}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-dark-600 mb-1">Earned</p>
-                    <p className="text-2xl font-bold text-green-600">${delivery.delivery_fee}</p>
-                    {delivery.rating && (
-                      <p className="text-sm text-yellow-600 mt-2">★ {delivery.rating}/5</p>
-                    )}
+                  <div className="text-right border-l border-light-200 md:pl-6">
+                    <p className="text-sm text-dark-600 mb-1 uppercase tracking-wide">You Earned</p>
+                    <p className="text-3xl font-bold text-green-600">NPR 50</p>
+                    <div className="mt-4 bg-white p-3 rounded-lg">
+                      <p className="text-xs text-dark-600">Order Total</p>
+                      <p className="text-lg font-bold text-dark-900">NPR {Math.round(delivery.total_amount)}</p>
+                    </div>
                   </div>
                 </div>
               </Card>

@@ -99,6 +99,7 @@ export const orderAPI = {
   getById: (id) => api.get(`/orders/${id}/`),
   getMyOrders: () => api.get('/orders/my_orders/'),
   getPendingOrders: () => api.get('/orders/pending_orders/'),
+  getAvailableOrders: () => api.get('/orders/pending_orders/'),
   create: (orderData) => api.post('/orders/', orderData),
   updateStatus: (id, statusData) => api.post(`/orders/${id}/update_status/`, statusData),
   assignRider: (id, riderData) => api.post(`/orders/${id}/assign_rider/`, riderData),

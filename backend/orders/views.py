@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db.models import Q
 
 from .models import Order, OrderItem
+# Force reload
 from .serializers import (
     OrderSerializer, OrderCreateSerializer,
     OrderStatusUpdateSerializer, RiderAssignmentSerializer
@@ -78,8 +79,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def my_orders(self, request):
-        """Get current user's orders"""
-        orders = self.get_queryset().filter(customer=request.user)
+        """Get current user's orders (customers get their orders, riders get their deliveries)"""
+        orders = self.get_queryset()
         serializer = self.get_serializer(orders, many=True)
         return Response(serializer.data)
     
@@ -144,11 +145,43 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def assign_rider(self, request, pk=None):
-        """Assign a rider to an order (restaurant owner or admin only)"""
-        order = self.get_object()
+        """Assign a rider to an order (riders can self-assign, or restaurant owner/admin can assign)"""
+        # Get order without queryset filtering (riders need to access unassigned orders)
+        try:
+            order = Order.objects.select_related('customer', 'restaurant', 'rider').get(pk=pk)
+        except Order.DoesNotExist:
+            return Response(
+                {'error': 'Order not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
         user = request.user
         
-        # Check permissions
+        # Check if order is in correct status for assignment
+        if order.status != 'READY_FOR_PICKUP':
+            return Response(
+                {'error': 'Order must be in READY_FOR_PICKUP status to assign a rider.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if order already has a rider
+        if order.rider is not None:
+            return Response(
+                {'error': 'This order already has a rider assigned.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Riders can self-assign
+        if user.role == 'RIDER':
+            order.rider = user
+            order.save(update_fields=['rider'])
+            
+            return Response(
+                OrderSerializer(order).data,
+                status=status.HTTP_200_OK
+            )
+        
+        # Restaurant owners and admins can assign any rider
         if user.role == 'ADMIN' or (hasattr(user, 'restaurant') and order.restaurant.owner == user):
             serializer = RiderAssignmentSerializer(data=request.data)
             
@@ -157,6 +190,12 @@ class OrderViewSet(viewsets.ModelViewSet):
                 User = get_user_model()
                 
                 rider = User.objects.get(id=serializer.validated_data['rider_id'])
+                if rider.role != 'RIDER':
+                    return Response(
+                        {'error': 'The specified user is not a rider.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
                 order.rider = rider
                 order.save(update_fields=['rider'])
                 
@@ -165,7 +204,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_200_OK
                 )
             
-            return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(
             {'error': 'You do not have permission to assign riders.'},

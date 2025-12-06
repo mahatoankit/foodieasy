@@ -85,19 +85,21 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-light-300">
-          <h2 className="text-2xl font-bold text-dark-900">
-            {initialData ? 'Edit Menu Item' : 'Add Menu Item'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-light-100 rounded-full transition-colors"
-            disabled={loading}
-          >
-            <X className="w-5 h-5 text-dark-600" />
-          </button>
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-6 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">
+              {initialData ? 'Edit Menu Item' : 'Add Menu Item'}
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              disabled={loading}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Form */}

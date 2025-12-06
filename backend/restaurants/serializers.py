@@ -34,7 +34,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'owner', 'owner_name', 'owner_email',
             'name', 'description', 'address', 'phone_number',
-            'cuisine_type', 'is_active', 'menu_items',
+            'cuisine_type', 'delivery_time', 'is_open', 'is_active', 'menu_items',
             'menu_items_count', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
@@ -64,7 +64,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'owner_name', 'name', 'description',
             'address', 'phone_number', 'cuisine_type',
-            'is_active', 'menu_items_count', 'created_at'
+            'delivery_time', 'is_open', 'is_active', 'menu_items_count', 'created_at'
         ]
     
     def get_owner_name(self, obj):
@@ -85,7 +85,7 @@ class RestaurantCreateSerializer(serializers.ModelSerializer):
         model = Restaurant
         fields = [
             'name', 'description', 'address',
-            'phone_number', 'cuisine_type'
+            'phone_number', 'cuisine_type', 'delivery_time', 'is_open'
         ]
     
     def validate(self, attrs):

@@ -78,26 +78,28 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-light-300">
-          <h2 className="text-2xl font-bold text-dark-900">
-            Edit Restaurant Profile
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-light-100 rounded-full transition-colors"
-            disabled={loading}
-          >
-            <X className="w-5 h-5 text-dark-600" />
-          </button>
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-6 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">
+              Edit Restaurant Profile
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              disabled={loading}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-dark-900 mb-1">
+              <label className="block text-sm font-semibold text-dark-900 mb-2">
                 Restaurant Name *
               </label>
               <Input
@@ -114,7 +116,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-dark-900 mb-1">
+              <label className="block text-sm font-semibold text-dark-900 mb-2">
                 Address *
               </label>
               <Input
@@ -131,7 +133,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-900 mb-1">
+              <label className="block text-sm font-semibold text-dark-900 mb-2">
                 Phone Number *
               </label>
               <Input
@@ -148,7 +150,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-900 mb-1">
+              <label className="block text-sm font-semibold text-dark-900 mb-2">
                 Cuisine Type *
               </label>
               <select
@@ -156,7 +158,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
                 value={formData.cuisine_type}
                 onChange={handleChange}
                 disabled={loading}
-                className="w-full px-4 py-3 border border-light-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                className="w-full px-4 py-2.5 border border-light-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               >
                 <option value="">Select cuisine type...</option>
                 <option value="NEPALI">Nepali</option>
@@ -178,7 +180,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-900 mb-1">
+              <label className="block text-sm font-semibold text-dark-900 mb-2">
                 Delivery Time
               </label>
               <Input
@@ -191,7 +193,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 bg-light-50 p-4 rounded-lg">
               <input
                 type="checkbox"
                 id="is_open"
@@ -199,15 +201,15 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
                 checked={formData.is_open}
                 onChange={handleChange}
                 disabled={loading}
-                className="w-4 h-4 text-primary-600 border-light-300 rounded focus:ring-primary-500"
+                className="w-5 h-5 text-primary-600 border-light-300 rounded focus:ring-primary-500"
               />
-              <label htmlFor="is_open" className="text-sm font-medium text-dark-900">
+              <label htmlFor="is_open" className="text-sm font-semibold text-dark-900">
                 Restaurant is currently open
               </label>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-dark-900 mb-1">
+              <label className="block text-sm font-semibold text-dark-900 mb-2">
                 Description
               </label>
               <textarea
@@ -217,7 +219,7 @@ const EditRestaurantModal = ({ isOpen, onClose, onSubmit, initialData = null, lo
                 placeholder="Tell customers about your restaurant..."
                 rows={3}
                 disabled={loading}
-                className="w-full px-4 py-3 border border-light-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                className="w-full px-4 py-2.5 border border-light-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
           </div>

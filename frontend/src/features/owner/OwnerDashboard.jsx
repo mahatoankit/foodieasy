@@ -30,7 +30,7 @@ const OwnerDashboard = () => {
   const [editRestaurantModalOpen, setEditRestaurantModalOpen] = useState(false);
 
   // Redux state
-  const { data: restaurant, loading: restaurantLoading, updateLoading } = useSelector(state => state.ownerRestaurant);
+  const { data: restaurant, loading: restaurantLoading } = useSelector(state => state.ownerRestaurant);
   const { orders, loading: ordersLoading } = useSelector(state => state.ownerOrders);
   const { items: menuItems, loading: menuLoading, actionLoading } = useSelector(state => state.menu);
 
@@ -51,7 +51,8 @@ const OwnerDashboard = () => {
     const colors = {
       PENDING: 'warning',
       PREPARING: 'info',
-      READY: 'success',
+      READY_FOR_PICKUP: 'success',
+      OUT_FOR_DELIVERY: 'info',
       DELIVERED: 'secondary',
       CANCELLED: 'error'
     };
@@ -414,7 +415,7 @@ const OwnerDashboard = () => {
                       {order.status === 'PREPARING' && (
                         <Button
                           size="sm"
-                          onClick={() => handleStatusUpdate(order.id, 'READY')}
+                          onClick={() => handleStatusUpdate(order.id, 'READY_FOR_PICKUP')}
                         >
                           Mark Ready
                         </Button>
@@ -487,7 +488,7 @@ const OwnerDashboard = () => {
         isOpen={createRestaurantModalOpen}
         onClose={handleCreateRestaurantClose}
         onSubmit={handleCreateRestaurantSubmit}
-        loading={updateLoading}
+        loading={restaurantLoading}
       />
 
       {/* Edit Restaurant Modal */}
@@ -496,7 +497,7 @@ const OwnerDashboard = () => {
         onClose={handleEditRestaurantClose}
         onSubmit={handleEditRestaurantSubmit}
         initialData={restaurant}
-        loading={updateLoading}
+        loading={restaurantLoading}
       />
       </div>
     </div>

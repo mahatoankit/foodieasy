@@ -39,6 +39,13 @@ class Restaurant(models.Model):
         default='OTHER',
         verbose_name='Cuisine Type'
     )
+    delivery_time = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='Delivery Time'
+    )
+    is_open = models.BooleanField(default=True, verbose_name='Is Open')
     is_active = models.BooleanField(default=True, verbose_name='Is Active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
