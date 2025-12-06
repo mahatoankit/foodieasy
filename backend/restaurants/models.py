@@ -58,11 +58,11 @@ class MenuItem(models.Model):
     """
     
     CATEGORY_CHOICES = [
-        ('APPETIZER', 'Appetizer'),
-        ('MAIN', 'Main Course'),
-        ('DESSERT', 'Dessert'),
-        ('BEVERAGE', 'Beverage'),
-        ('SIDE', 'Side Dish'),
+        ('APPETIZERS', 'Appetizers'),
+        ('MAIN_COURSE', 'Main Course'),
+        ('DESSERTS', 'Desserts'),
+        ('BEVERAGES', 'Beverages'),
+        ('SIDES', 'Sides'),
     ]
     
     restaurant = models.ForeignKey(
@@ -80,7 +80,7 @@ class MenuItem(models.Model):
     category = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
-        default='MAIN',
+        default='MAIN_COURSE',
         verbose_name='Category'
     )
     is_available = models.BooleanField(default=True, verbose_name='Is Available')

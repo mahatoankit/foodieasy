@@ -16,7 +16,8 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import MenuItemModal from './MenuItemModal';
 import CreateRestaurantModal from './CreateRestaurantModal';
-import { fetchMyRestaurant, createRestaurant } from './restaurantSlice';
+import EditRestaurantModal from './EditRestaurantModal';
+import { fetchMyRestaurant, createRestaurant, updateRestaurant } from './restaurantSlice';
 import { fetchRestaurantOrders, updateOrderStatus } from './ownerOrdersSlice';
 import { fetchMyMenu, createMenuItem, updateMenuItem, deleteMenuItem } from '../menu/menuSlice';
 
@@ -26,6 +27,7 @@ const OwnerDashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [createRestaurantModalOpen, setCreateRestaurantModalOpen] = useState(false);
+  const [editRestaurantModalOpen, setEditRestaurantModalOpen] = useState(false);
 
   // Redux state
   const { data: restaurant, loading: restaurantLoading, updateLoading } = useSelector(state => state.ownerRestaurant);
@@ -126,6 +128,28 @@ const OwnerDashboard = () => {
     setCreateRestaurantModalOpen(false);
   };
 
+  const handleEditRestaurant = () => {
+    setEditRestaurantModalOpen(true);
+  };
+
+  const handleEditRestaurantSubmit = (formData) => {
+    dispatch(updateRestaurant({ id: restaurant.id, data: formData }))
+      .unwrap()
+      .then(() => {
+        setEditRestaurantModalOpen(false);
+        // Refresh restaurant data
+        dispatch(fetchMyRestaurant());
+      })
+      .catch((error) => {
+        console.error('Failed to update restaurant:', error);
+        alert(error?.message || 'Failed to update restaurant. Please try again.');
+      });
+  };
+
+  const handleEditRestaurantClose = () => {
+    setEditRestaurantModalOpen(false);
+  };
+
   // Calculate today's stats
   const todayOrders = orders.filter(order => {
     const orderDate = new Date(order.created_at);
@@ -153,7 +177,7 @@ const OwnerDashboard = () => {
     },
     {
       label: 'Today\'s Revenue',
-      value: `NPR ${todayRevenue.toFixed(0)}`,
+      value: `NPR ${Math.round(todayRevenue)}`,
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
@@ -247,7 +271,7 @@ const OwnerDashboard = () => {
                 <p><strong>Delivery Time:</strong> {restaurant.delivery_time || 'N/A'}</p>
               </div>
               <div className="mt-4">
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" onClick={handleEditRestaurant}>
                   <Edit2 className="w-4 h-4" />
                   Edit Restaurant Profile
                 </Button>
@@ -290,7 +314,7 @@ const OwnerDashboard = () => {
                   <p className="text-sm text-dark-700 mb-2">
                     {order.items?.length || 0} item(s)
                   </p>
-                  <p className="font-bold text-primary-600">${order.total_amount}</p>
+                  <p className="font-bold text-primary-600">NPR {Math.round(order.total_amount)}</p>
                 </div>
               ))}
             </div>
@@ -331,7 +355,7 @@ const OwnerDashboard = () => {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-3">
-                      <p className="text-2xl font-bold text-primary-600">${order.total_amount}</p>
+                      <p className="text-2xl font-bold text-primary-600">NPR {Math.round(order.total_amount)}</p>
                       {order.status === 'PENDING' && (
                         <div className="flex gap-2">
                           <Button
@@ -386,15 +410,15 @@ const OwnerDashboard = () => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="font-bold text-dark-900">{item.name}</h3>
-                    <p className="text-sm text-dark-600">{item.category}</p>
+                    <p className="text-sm text-dark-600">{item.category?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                   </div>
-                  <Badge variant={item.available ? 'success' : 'error'}>
-                    {item.available ? 'Available' : 'Out of Stock'}
+                  <Badge variant={item.is_available ? 'success' : 'error'}>
+                    {item.is_available ? 'Available' : 'Out of Stock'}
                   </Badge>
                 </div>
                 <p className="text-sm text-dark-700 mb-3">{item.description}</p>
                 <div className="flex justify-between items-center">
-                  <p className="text-lg font-bold text-primary-600">${item.price}</p>
+                  <p className="text-lg font-bold text-primary-600">NPR {Math.round(item.price)}</p>
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" onClick={() => handleEditMenuItem(item)}>
                       <Edit2 className="w-4 h-4" />
@@ -424,6 +448,15 @@ const OwnerDashboard = () => {
         isOpen={createRestaurantModalOpen}
         onClose={handleCreateRestaurantClose}
         onSubmit={handleCreateRestaurantSubmit}
+        loading={updateLoading}
+      />
+
+      {/* Edit Restaurant Modal */}
+      <EditRestaurantModal
+        isOpen={editRestaurantModalOpen}
+        onClose={handleEditRestaurantClose}
+        onSubmit={handleEditRestaurantSubmit}
+        initialData={restaurant}
         loading={updateLoading}
       />
     </div>

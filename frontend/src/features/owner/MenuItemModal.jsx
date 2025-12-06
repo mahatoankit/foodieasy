@@ -9,7 +9,7 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
     category: '',
     price: '',
     description: '',
-    available: true,
+    is_available: true,
   });
 
   const [errors, setErrors] = useState({});
@@ -21,7 +21,7 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
         category: initialData.category || '',
         price: initialData.price || '',
         description: initialData.description || '',
-        available: initialData.available !== undefined ? initialData.available : true,
+        is_available: initialData.is_available !== undefined ? initialData.is_available : true,
       });
     } else {
       setFormData({
@@ -29,7 +29,7 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
         category: '',
         price: '',
         description: '',
-        available: true,
+        is_available: true,
       });
     }
     setErrors({});
@@ -123,14 +123,20 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
             <label className="block text-sm font-medium text-dark-900 mb-1">
               Category *
             </label>
-            <Input
-              type="text"
+            <select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              placeholder="e.g., Pizza, Pasta, Salad"
               disabled={loading}
-            />
+              className="w-full px-4 py-3 border border-light-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+            >
+              <option value="">Select category...</option>
+              <option value="APPETIZERS">Appetizers</option>
+              <option value="MAIN_COURSE">Main Course</option>
+              <option value="DESSERTS">Desserts</option>
+              <option value="BEVERAGES">Beverages</option>
+              <option value="SIDES">Sides</option>
+            </select>
             {errors.category && (
               <p className="text-red-500 text-sm mt-1">{errors.category}</p>
             )}
@@ -138,15 +144,15 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
 
           <div>
             <label className="block text-sm font-medium text-dark-900 mb-1">
-              Price ($) *
+              Price (NPR) *
             </label>
             <Input
               type="number"
               name="price"
               value={formData.price}
               onChange={handleChange}
-              placeholder="0.00"
-              step="0.01"
+              placeholder="0"
+              step="1"
               min="0"
               disabled={loading}
             />
@@ -176,14 +182,14 @@ const MenuItemModal = ({ isOpen, onClose, onSubmit, initialData = null, loading 
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
-              id="available"
-              name="available"
-              checked={formData.available}
+              id="is_available"
+              name="is_available"
+              checked={formData.is_available}
               onChange={handleChange}
               disabled={loading}
               className="w-4 h-4 text-primary-600 border-light-300 rounded focus:ring-primary-500"
             />
-            <label htmlFor="available" className="text-sm font-medium text-dark-900">
+            <label htmlFor="is_available" className="text-sm font-medium text-dark-900">
               Available for orders
             </label>
           </div>
