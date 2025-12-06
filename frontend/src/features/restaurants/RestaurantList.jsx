@@ -14,17 +14,40 @@ const RestaurantList = () => {
   const [search, setSearch] = useState('');
   const [cuisineFilter, setCuisineFilter] = useState('');
 
+  // Fetch all restaurants once on mount
   useEffect(() => {
-    const params = {};
-    if (search) params.search = search;
-    if (cuisineFilter) params.cuisine_type = cuisineFilter;
-    
-    dispatch(fetchRestaurants(params));
-  }, [dispatch, search, cuisineFilter]);
+    dispatch(fetchRestaurants({}));
+  }, [dispatch]);
+
+  // Refetch when window gains focus (user comes back to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      dispatch(fetchRestaurants({}));
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [dispatch]);
 
   const cuisineTypes = ['CHINESE', 'MALAY', 'INDIAN', 'WESTERN', 'JAPANESE', 'THAI', 'ITALIAN', 'OTHER'];
 
-  if (loading) {
+  // Client-side filtering - no page reload, just filter the existing list
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    // Filter by cuisine type
+    const matchesCuisine = !cuisineFilter || restaurant.cuisine_type === cuisineFilter;
+    
+    // Filter by search term (search in name, description, cuisine, address)
+    const matchesSearch = !search || 
+      restaurant.name.toLowerCase().includes(search.toLowerCase()) ||
+      restaurant.description?.toLowerCase().includes(search.toLowerCase()) ||
+      restaurant.cuisine_type?.toLowerCase().includes(search.toLowerCase()) ||
+      restaurant.address?.toLowerCase().includes(search.toLowerCase());
+    
+    return matchesCuisine && matchesSearch;
+  });
+
+  // Only show full-page loading on initial load when no restaurants exist
+  if (loading && restaurants.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-xl">Loading restaurants...</div>
@@ -105,14 +128,14 @@ const RestaurantList = () => {
         </div>
 
         {/* Restaurant Grid */}
-        {restaurants.length === 0 ? (
+        {filteredRestaurants.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 text-xl">No restaurants found</p>
             <p className="text-gray-400 mt-2">Try adjusting your search or filters</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {restaurants.map((restaurant, index) => {
+            {filteredRestaurants.map((restaurant, index) => {
               // Array of food images for variety
               const foodImages = [
                 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', // Pizza
