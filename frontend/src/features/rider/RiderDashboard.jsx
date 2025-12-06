@@ -11,7 +11,8 @@ import {
   Navigation,
   Phone,
   AlertCircle,
-  Truck
+  Truck,
+  Store
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -199,122 +200,154 @@ const RiderDashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-light-200">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-dark-900 mb-3">
-          🚴 Rider Dashboard
-        </h1>
-        <p className="text-dark-600 text-lg">
-          Welcome back, <span className="font-semibold text-primary-600">{user?.name || 'Rider'}</span>
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index} className="hover:shadow-lg transition-shadow border-2 border-light-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-dark-600 text-sm mb-2 uppercase tracking-wide font-medium">{stat.label}</p>
-                  <p className="text-3xl font-bold text-dark-900">{stat.value}</p>
-                </div>
-                <div className={`p-4 rounded-xl ${stat.bgColor}`}>
-                  <Icon className={`w-8 h-8 ${stat.color}`} />
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Tabs */}
-      <div className="mb-8 border-b-2 border-light-200">
-        <div className="flex gap-2">
-          {['available', 'active', 'history'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-4 px-6 font-semibold text-base capitalize transition-all rounded-t-lg ${
-                activeTab === tab
-                  ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
-                  : 'text-dark-600 hover:text-dark-900 hover:bg-light-100'
-              }`}
-            >
-              {tab === 'available' ? '📦 Available Orders' : tab === 'active' ? '🚴 Active Deliveries' : '📋 History'}
-            </button>
-          ))}
+      <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-12 px-4 mb-8 shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <Bike className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold mb-1 drop-shadow-md">
+                Rider Dashboard
+              </h1>
+              <p className="text-primary-50 text-lg">
+                Welcome back, {user?.name || 'Rider'}!
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Available Orders Tab */}
-      {activeTab === 'available' && (
-        <div className="space-y-4">
-          {availableOrders.length === 0 ? (
-            <Card>
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 text-dark-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-dark-900 mb-2">No Available Orders</h3>
-                <p className="text-dark-600">Check back soon for new delivery opportunities.</p>
-              </div>
-            </Card>
+      <div className="max-w-7xl mx-auto px-4 pb-8">
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index} className="hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-dark-600 text-sm font-medium mb-2">{stat.label}</p>
+                    <p className="text-3xl font-bold text-dark-900">{stat.value}</p>
+                  </div>
+                  <div className={`p-4 rounded-xl ${stat.bgColor} shadow-md`}>
+                    <Icon className={`w-7 h-7 ${stat.color}`} />
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-8 bg-white rounded-xl shadow-md p-2">
+          <div className="flex space-x-2">
+            {['available', 'active', 'history'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-3 px-6 rounded-lg font-semibold text-base capitalize transition-all ${
+                  activeTab === tab
+                    ? 'bg-primary-600 text-white shadow-lg'
+                    : 'text-dark-600 hover:bg-light-100'
+                }`}
+              >
+                {tab === 'available' ? 'Available Orders' : tab === 'active' ? 'Active Deliveries' : 'History'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Available Orders Tab */}
+        {activeTab === 'available' && (
+          <div className="space-y-4">
+            {availableOrders.length === 0 ? (
+              <Card className="bg-white shadow-lg">
+                <div className="text-center py-16">
+                  <div className="p-4 bg-light-100 rounded-full inline-block mb-4">
+                    <Package className="w-16 h-16 text-dark-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-dark-900 mb-2">No Available Orders</h3>
+                  <p className="text-dark-600">Check back soon for new delivery opportunities.</p>
+                </div>
+              </Card>
           ) : (
             availableOrders.map((order) => (
-              <Card key={order.id} className="hover:shadow-lg transition-shadow border-2 border-light-200 hover:border-primary-300">
+              <Card key={order.id} className="bg-white hover:shadow-xl transition-all duration-300 border border-light-300">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-dark-900">Order #{order.id}</h3>
-                        <Badge variant="warning" className="text-sm">🔥 New Order</Badge>
+                    <div className="border-b border-light-200 pb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-2xl font-bold text-dark-900">Order #{order.id}</h3>
+                        <Badge variant="warning">New</Badge>
                       </div>
-                      <p className="text-primary-600 font-semibold text-lg">{order.restaurant_name}</p>
-                      <p className="text-dark-600 text-sm mt-1">{order.item_count} item(s)</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Store className="w-5 h-5 text-primary-600" />
+                        <p className="text-primary-600 font-semibold text-lg">{order.restaurant_name}</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-dark-600">
+                        <Package className="w-4 h-4" />
+                        <span>{order.item_count} {order.item_count === 1 ? 'item' : 'items'}</span>
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="bg-light-50 p-4 rounded-lg">
-                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">📍 Pickup From</p>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
-                          <p className="text-dark-700 font-medium">{order.restaurant_name}</p>
+                      <div className="bg-primary-50 p-4 rounded-lg border border-primary-100">
+                        <p className="text-xs font-semibold text-primary-700 mb-3 uppercase tracking-wider">Pickup Location</p>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-white rounded-lg shadow-sm">
+                            <MapPin className="w-5 h-5 text-primary-600" />
+                          </div>
+                          <p className="text-dark-900 font-medium">{order.restaurant_name}</p>
                         </div>
                       </div>
 
-                      <div className="bg-light-50 p-4 rounded-lg">
-                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">🚚 Deliver To</p>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <p className="text-xs font-semibold text-green-700 mb-3 uppercase tracking-wider">Delivery Location</p>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-white rounded-lg shadow-sm">
+                            <MapPin className="w-5 h-5 text-green-600" />
+                          </div>
                           <div>
-                            <p className="text-dark-700 font-medium">{order.delivery_address}</p>
+                            <p className="text-dark-900 font-medium">{order.delivery_address}</p>
                             <p className="text-dark-600 text-sm mt-1">{order.customer_name}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-primary-50 p-4 rounded-lg border border-primary-200">
-                      <p className="text-sm font-semibold text-dark-900 mb-2">Order Details</p>
-                      <div className="space-y-1">
-                        <p className="text-dark-700 text-sm"><span className="font-medium">Total Amount:</span> NPR {Math.round(order.total_amount)}</p>
-                        <p className="text-dark-700 text-sm"><span className="font-medium">Customer:</span> {order.customer_email}</p>
+                    <div className="bg-light-100 p-4 rounded-lg">
+                      <p className="text-xs font-semibold text-dark-700 mb-3 uppercase tracking-wider">Order Summary</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-dark-600 text-sm">Order Total:</span>
+                          <span className="text-dark-900 font-semibold">NPR {Math.round(order.total_amount)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-dark-600">Customer:</span>
+                          <span className="text-dark-700">{order.customer_email}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end justify-between lg:w-52 border-l border-light-200 lg:pl-6">
-                    <div className="text-right mb-4 w-full">
-                      <p className="text-sm text-dark-600 mb-1 uppercase tracking-wide">You'll Earn</p>
-                      <p className="text-4xl font-bold text-green-600 mb-2">NPR 50</p>
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-sm text-dark-700"><span className="font-medium">Order Total:</span></p>
-                        <p className="text-lg font-bold text-dark-900">NPR {Math.round(order.total_amount)}</p>
+                  <div className="flex flex-col justify-between lg:w-64 border-l border-light-200 lg:pl-6">
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 mb-4">
+                      <p className="text-xs font-semibold text-green-700 mb-2 uppercase tracking-wider">Your Earnings</p>
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <DollarSign className="w-6 h-6 text-green-600" />
+                        <p className="text-4xl font-bold text-green-600">50</p>
+                        <span className="text-green-700 font-medium">NPR</span>
+                      </div>
+                      <div className="text-xs text-green-700">
+                        <p>Fixed delivery fee</p>
                       </div>
                     </div>
                     <Button
-                      className="w-full lg:w-48 text-base py-3"
+                      className="w-full text-base py-3 shadow-lg"
                       onClick={() => handleAcceptOrder(order.id)}
                     >
                       <CheckCircle className="w-5 h-5 mr-2" />
@@ -328,73 +361,99 @@ const RiderDashboard = () => {
         </div>
       )}
 
-      {/* Active Deliveries Tab */}
-      {activeTab === 'active' && (
-        <div className="space-y-4">
-          {activeDeliveries.length === 0 ? (
-            <Card>
-              <div className="text-center py-12">
-                <Bike className="w-16 h-16 text-dark-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-dark-900 mb-2">No Active Deliveries</h3>
-                <p className="text-dark-600">Accept an order to start delivering.</p>
-              </div>
-            </Card>
+        {/* Active Deliveries Tab */}
+        {activeTab === 'active' && (
+          <div className="space-y-4">
+            {activeDeliveries.length === 0 ? (
+              <Card className="bg-white shadow-lg">
+                <div className="text-center py-16">
+                  <div className="p-4 bg-light-100 rounded-full inline-block mb-4">
+                    <Bike className="w-16 h-16 text-dark-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-dark-900 mb-2">No Active Deliveries</h3>
+                  <p className="text-dark-600">Accept an order to start delivering.</p>
+                </div>
+              </Card>
           ) : (
             activeDeliveries.map((order) => (
-              <Card key={order.id} className="hover:shadow-lg transition-shadow">
+              <Card key={order.id} className="bg-white hover:shadow-xl transition-all duration-300 border border-light-300">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-dark-900">Order #{order.id}</h3>
-                        <Badge variant={order.status === 'OUT_FOR_DELIVERY' ? 'info' : 'success'} className="text-sm">
+                    <div className="border-b border-light-200 pb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-2xl font-bold text-dark-900">Order #{order.id}</h3>
+                        <Badge variant={order.status === 'OUT_FOR_DELIVERY' ? 'info' : 'success'}>
                           {order.status === 'OUT_FOR_DELIVERY' ? 'In Transit' : 'Ready for Pickup'}
                         </Badge>
                       </div>
-                      <p className="text-primary-600 font-semibold text-lg">{order.restaurant_name}</p>
-                      <p className="text-dark-600 text-sm mt-1">{order.item_count} item(s)</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Store className="w-5 h-5 text-primary-600" />
+                        <p className="text-primary-600 font-semibold text-lg">{order.restaurant_name}</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-dark-600">
+                        <Package className="w-4 h-4" />
+                        <span>{order.item_count} {order.item_count === 1 ? 'item' : 'items'}</span>
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="bg-light-50 p-4 rounded-lg">
-                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">
-                          {order.status === 'READY_FOR_PICKUP' ? '📍 Pickup From' : '✓ Picked Up From'}
+                      <div className={`p-4 rounded-lg border ${order.status === 'READY_FOR_PICKUP' ? 'bg-primary-50 border-primary-100' : 'bg-light-100 border-light-200'}`}>
+                        <p className={`text-xs font-semibold mb-3 uppercase tracking-wider ${order.status === 'READY_FOR_PICKUP' ? 'text-primary-700' : 'text-dark-600'}`}>
+                          {order.status === 'READY_FOR_PICKUP' ? 'Pickup Location' : 'Picked Up From'}
                         </p>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
-                          <p className="text-dark-700 font-medium">{order.restaurant_name}</p>
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 bg-white rounded-lg shadow-sm ${order.status === 'OUT_FOR_DELIVERY' ? 'opacity-60' : ''}`}>
+                            {order.status === 'READY_FOR_PICKUP' ? (
+                              <MapPin className="w-5 h-5 text-primary-600" />
+                            ) : (
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                            )}
+                          </div>
+                          <p className="text-dark-900 font-medium">{order.restaurant_name}</p>
                         </div>
                       </div>
 
-                      <div className="bg-light-50 p-4 rounded-lg">
-                        <p className="text-sm font-semibold text-dark-900 mb-2 uppercase tracking-wide">🚚 Deliver To</p>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <p className="text-xs font-semibold text-green-700 mb-3 uppercase tracking-wider">Delivery Location</p>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-white rounded-lg shadow-sm">
+                            <MapPin className="w-5 h-5 text-green-600" />
+                          </div>
                           <div>
-                            <p className="text-dark-700 font-medium">{order.delivery_address}</p>
+                            <p className="text-dark-900 font-medium">{order.delivery_address}</p>
                             <p className="text-dark-600 text-sm mt-1">{order.customer_name}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-primary-50 p-4 rounded-lg border border-primary-200">
-                      <p className="text-sm font-semibold text-dark-900 mb-2">Order Details</p>
-                      <div className="space-y-1">
-                        <p className="text-dark-700 text-sm"><span className="font-medium">Total Amount:</span> NPR {Math.round(order.total_amount)}</p>
-                        <p className="text-dark-700 text-sm"><span className="font-medium">Customer:</span> {order.customer_email}</p>
+                    <div className="bg-light-100 p-4 rounded-lg">
+                      <p className="text-xs font-semibold text-dark-700 mb-3 uppercase tracking-wider">Order Summary</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-dark-600 text-sm">Order Total:</span>
+                          <span className="text-dark-900 font-semibold">NPR {Math.round(order.total_amount)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-dark-600">Customer:</span>
+                          <span className="text-dark-700">{order.customer_email}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end justify-between lg:w-52 border-l border-light-200 lg:pl-6">
-                    <div className="text-right mb-4 w-full">
-                      <p className="text-sm text-dark-600 mb-1 uppercase tracking-wide">Delivery Fee</p>
-                      <p className="text-3xl font-bold text-green-600">NPR 50</p>
+                  <div className="flex flex-col justify-between lg:w-64 border-l border-light-200 lg:pl-6">
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 mb-4">
+                      <p className="text-xs font-semibold text-green-700 mb-2 uppercase tracking-wider">Delivery Fee</p>
+                      <div className="flex items-baseline gap-2">
+                        <DollarSign className="w-6 h-6 text-green-600" />
+                        <p className="text-4xl font-bold text-green-600">50</p>
+                        <span className="text-green-700 font-medium">NPR</span>
+                      </div>
                     </div>
                     {order.status === 'READY_FOR_PICKUP' ? (
                       <Button
-                        className="w-full lg:w-48 text-base py-3"
+                        className="w-full text-base py-3 shadow-lg"
                         onClick={() => handlePickup(order.id)}
                       >
                         <Truck className="w-5 h-5 mr-2" />
@@ -402,7 +461,7 @@ const RiderDashboard = () => {
                       </Button>
                     ) : (
                       <Button
-                        className="w-full lg:w-48 text-base py-3"
+                        className="w-full text-base py-3 shadow-lg"
                         variant="success"
                         onClick={() => handleDeliver(order.id)}
                       >
@@ -418,45 +477,61 @@ const RiderDashboard = () => {
         </div>
       )}
 
-      {/* History Tab */}
-      {activeTab === 'history' && (
-        <div className="space-y-4">
-          {completedDeliveries.length === 0 ? (
-            <Card>
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 text-dark-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-dark-900 mb-2">No Delivery History</h3>
-                <p className="text-dark-600">Your completed deliveries will appear here.</p>
-              </div>
-            </Card>
+        {/* History Tab */}
+        {activeTab === 'history' && (
+          <div className="space-y-4">
+            {completedDeliveries.length === 0 ? (
+              <Card className="bg-white shadow-lg">
+                <div className="text-center py-16">
+                  <div className="p-4 bg-light-100 rounded-full inline-block mb-4">
+                    <Package className="w-16 h-16 text-dark-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-dark-900 mb-2">No Delivery History</h3>
+                  <p className="text-dark-600">Your completed deliveries will appear here.</p>
+                </div>
+              </Card>
           ) : (
             completedDeliveries.map((delivery) => (
-              <Card key={delivery.id} className="bg-light-50">
+              <Card key={delivery.id} className="bg-white hover:shadow-lg transition-all duration-300 border border-light-300">
                 <div className="flex flex-col md:flex-row justify-between gap-6">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-xl font-bold text-dark-900">Order #{delivery.id}</h3>
-                      <Badge variant="success" className="text-sm">✓ Delivered</Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-dark-700 font-semibold text-lg">{delivery.restaurant_name}</p>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-dark-500" />
-                        <p className="text-sm text-dark-600">{delivery.delivery_address}</p>
+                    <div className="border-b border-light-200 pb-4 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-2xl font-bold text-dark-900">Order #{delivery.id}</h3>
+                        <Badge variant="success">Delivered</Badge>
                       </div>
-                      <p className="text-sm text-dark-600">Customer: {delivery.customer_name}</p>
-                      <div className="flex items-center gap-2 mt-3 text-sm text-dark-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Store className="w-5 h-5 text-primary-600" />
+                        <p className="text-primary-600 font-semibold text-lg">{delivery.restaurant_name}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 bg-light-50 p-3 rounded-lg">
+                        <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-dark-600 mb-1">Delivered To</p>
+                          <p className="text-sm font-medium text-dark-900">{delivery.delivery_address}</p>
+                          <p className="text-sm text-dark-600 mt-1">{delivery.customer_name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-dark-500">
                         <Clock className="w-4 h-4" />
                         <p>{new Date(delivery.updated_at).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right border-l border-light-200 md:pl-6">
-                    <p className="text-sm text-dark-600 mb-1 uppercase tracking-wide">You Earned</p>
-                    <p className="text-3xl font-bold text-green-600">NPR 50</p>
-                    <div className="mt-4 bg-white p-3 rounded-lg">
-                      <p className="text-xs text-dark-600">Order Total</p>
-                      <p className="text-lg font-bold text-dark-900">NPR {Math.round(delivery.total_amount)}</p>
+                  <div className="flex flex-col justify-between md:w-64 border-l border-light-200 md:pl-6">
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 mb-4">
+                      <p className="text-xs font-semibold text-green-700 mb-2 uppercase tracking-wider">You Earned</p>
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <DollarSign className="w-6 h-6 text-green-600" />
+                        <p className="text-4xl font-bold text-green-600">50</p>
+                        <span className="text-green-700 font-medium">NPR</span>
+                      </div>
+                    </div>
+                    <div className="bg-light-100 p-4 rounded-lg">
+                      <p className="text-xs text-dark-600 mb-1">Order Total</p>
+                      <p className="text-2xl font-bold text-dark-900">NPR {Math.round(delivery.total_amount)}</p>
                     </div>
                   </div>
                 </div>
@@ -464,7 +539,8 @@ const RiderDashboard = () => {
             ))
           )}
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
