@@ -130,8 +130,9 @@ const RestaurantList = () => {
         {/* Restaurant Grid */}
         {filteredRestaurants.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-500 text-xl">No restaurants found</p>
-            <p className="text-gray-400 mt-2">Try adjusting your search or filters</p>
+            <ChefHat className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-700 text-2xl font-semibold mb-2">No restaurants found</p>
+            <p className="text-gray-500">Try adjusting your search or filters</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -147,53 +148,65 @@ const RestaurantList = () => {
               ];
               
               return (
-              <Link key={restaurant.id} to={`/restaurants/${restaurant.id}`}>
-                <Card hover className="h-full overflow-hidden">
+              <Link key={restaurant.id} to={`/restaurants/${restaurant.id}`} className="group">
+                <Card hover className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl">
                   {/* Restaurant Image/Banner */}
-                  <div className="h-48 relative overflow-hidden">
+                  <div className="h-52 relative overflow-hidden">
                     <img 
                       src={foodImages[index % foodImages.length]}
                       alt={restaurant.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div className="absolute top-3 right-3">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-4 right-4">
                       <Badge variant={restaurant.is_active ? 'success' : 'error'}>
-                        {restaurant.is_active ? 'Open' : 'Closed'}
+                        {restaurant.is_active ? 'Open Now' : 'Closed'}
                       </Badge>
+                    </div>
+
+                    {/* Restaurant Name Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <h3 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">
+                        {restaurant.name}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Rating value={4.5} size="sm" />
+                        <span className="text-white text-sm font-medium drop-shadow">(120+ ratings)</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Restaurant Info */}
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold text-dark-900 mb-2">
-                      {restaurant.name}
-                    </h3>
-                    
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary">{restaurant.cuisine_type}</Badge>
-                      <Rating value={4.5} size="sm" />
-                      <span className="text-sm text-gray-600">(120+)</span>
+                  <div className="p-5">
+                    {/* Cuisine Badge */}
+                    <div className="mb-3">
+                      <Badge variant="secondary" className="text-xs">
+                        {restaurant.cuisine_type?.replace(/_/g, ' ')}
+                      </Badge>
                     </div>
 
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {restaurant.description}
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-4 min-h-[40px]">
+                      {restaurant.description || 'Delicious food prepared with passion and care'}
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} />
-                        <span>25-35 min</span>
+                    {/* Info Row */}
+                    <div className="flex items-center justify-between text-sm text-gray-600 mb-4 pb-4 border-b border-gray-100">
+                      <div className="flex items-center gap-1.5">
+                        <Clock size={16} className="text-primary-500" />
+                        <span className="font-medium">25-35 min</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin size={16} />
-                        <span className="truncate">{restaurant.address.split(',')[0]}</span>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin size={16} className="text-primary-500" />
+                        <span className="truncate max-w-[120px]">{restaurant.address.split(',')[0]}</span>
                       </div>
                     </div>
                     
                     {/* View Menu Button */}
-                    <button className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
-                      <ChefHat size={18} />
+                    <button className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg group-hover:scale-[1.02]">
+                      <ChefHat size={20} />
                       View Menu
                     </button>
                   </div>
