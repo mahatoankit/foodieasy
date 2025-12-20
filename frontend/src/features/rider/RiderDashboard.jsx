@@ -8,8 +8,6 @@ import {
   Clock,
   DollarSign,
   CheckCircle,
-  Navigation,
-  Phone,
   AlertCircle,
   Truck,
   Store

@@ -63,9 +63,18 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
+      // Clear auth data
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
+      
+      // Clear user-specific cart data
+      const user = state.user;
+      if (user) {
+        localStorage.removeItem(`cart_${user.id}`);
+        localStorage.removeItem(`cartRestaurant_${user.id}`);
+      }
+      
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;

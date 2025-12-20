@@ -343,9 +343,20 @@ const OwnerDashboard = () => {
                       {order.status}
                     </Badge>
                   </div>
+                  <div className="mb-3">
+                    {order.items && order.items.length > 0 && (
+                      <div className="space-y-1">
+                        {order.items.map((item) => (
+                          <p key={item.id} className="text-sm text-dark-700">
+                            {item.quantity}× {item.menu_item_name}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex justify-between items-center">
-                    <p className="text-sm text-dark-700">
-                      {order.items?.length || 0} item(s)
+                    <p className="text-sm text-dark-500">
+                      {new Date(order.created_at).toLocaleString()}
                     </p>
                     <p className="text-xl font-bold text-primary-600">NPR {Math.round(order.total_amount)}</p>
                   </div>
@@ -384,7 +395,25 @@ const OwnerDashboard = () => {
                       </div>
                       <div className="space-y-2">
                         <p className="text-dark-600"><span className="font-medium">Customer:</span> {order.customer?.email || 'Customer'}</p>
-                        <p className="text-dark-700"><span className="font-medium">Items:</span> {order.items?.length || 0} item(s)</p>
+                        <div className="text-dark-700">
+                          <span className="font-medium">Items:</span>
+                          <div className="mt-2 space-y-1">
+                            {order.items && order.items.length > 0 ? (
+                              order.items.map((item) => (
+                                <div key={item.id} className="flex justify-between items-center bg-gray-50 px-3 py-2 rounded">
+                                  <span className="text-sm">
+                                    {item.quantity}× {item.menu_item_name}
+                                  </span>
+                                  <span className="text-sm font-medium text-gray-700">
+                                    NPR {Math.round(item.price_at_order * item.quantity)}
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              <span className="text-sm text-gray-500">No items</span>
+                            )}
+                          </div>
+                        </div>
                         <p className="text-sm text-dark-500">
                           <span className="font-medium">Time:</span> {new Date(order.created_at).toLocaleString()}
                         </p>

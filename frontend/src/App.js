@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from './app/store';
 import ToastProvider from './components/ui/ToastProvider';
+import { loadCart } from './features/cart/cartSlice';
 // import StackAuthProvider from './components/auth/StackAuthProvider';
 
 // Layout
@@ -33,11 +34,25 @@ import RiderDashboard from './features/rider/RiderDashboard';
 
 import './App.css';
 
+// Component to handle cart loading based on user authentication
+function CartLoader() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    // Load cart when user changes (login/logout)
+    dispatch(loadCart());
+  }, [user, dispatch]);
+
+  return null;
+}
+
 function App() {
   return (
     <Provider store={store}>
       <ToastProvider>
         <Router>
+          <CartLoader />
           <div className="App min-h-screen bg-gray-50">
             <Navbar />
             <Routes>

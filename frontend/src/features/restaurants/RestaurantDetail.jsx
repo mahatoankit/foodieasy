@@ -28,6 +28,12 @@ const RestaurantDetail = () => {
       navigate('/login');
       return;
     }
+
+    // Only customers can add items to cart
+    if (user.role !== 'CUSTOMER') {
+      toast.error('Only customers can add items to cart');
+      return;
+    }
     
     dispatch(addToCart({ 
       menuItem, 
