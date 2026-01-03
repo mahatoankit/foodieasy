@@ -98,7 +98,19 @@ DATABASES = {
         'PORT': 5432,
         'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
     }
+    
 }
+
+# Test Database Configuration - Use SQLite for testing
+import sys
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',  # Use in-memory database for super fast tests
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
