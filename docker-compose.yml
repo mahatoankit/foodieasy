@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Django Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: foodieasy-backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://neondb_owner:npg_r2TBlQ0PbXFh@ep-late-band-a1dsd6gi-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      - SECRET_KEY=django-insecure-!)af0k1788@%41(-u5ba12g*m1vh=(fp6k=i8=&cl4l!15#5y%
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+    networks:
+      - foodieasy-network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: foodieasy-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8000/api
+      - REACT_APP_ENV=development
+      - REACT_APP_STACK_PROJECT_ID=888f8766-1d09-4395-bb38-b93a52e555c0
+      - REACT_APP_STACK_PUBLISHABLE_CLIENT_KEY=pck_c2sww29037zf710k8b2d22645ww6denrbwdrwb9adk80g
+      - REACT_APP_STACK_SECRET_SERVER_KEY=ssk_fv0dkk6ww6mppb51cq4kqcgdyv4jynnv5tmk38mj73dh8
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - backend
+    networks:
+      - foodieasy-network
+    stdin_open: true
+    tty: true
+
+networks:
+  foodieasy-network:
+    driver: bridge
