@@ -1,12 +1,13 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Package, Home, LayoutDashboard, Bike } from 'lucide-react';
 import { logout } from '../../features/auth/authSlice';
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
 
@@ -16,6 +17,16 @@ const Navbar = () => {
   };
 
   const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Helper function to determine if a path is active
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+
+  // Helper function to get nav item classes
+  const getNavClass = (path) => {
+    return isActive(path)
+      ? "p-3 rounded-full bg-primary-500 text-white shadow-lg transition-all duration-200"
+      : "p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200";
+  };
 
   return (
     <>
@@ -55,7 +66,7 @@ const Navbar = () => {
                 {/* Home/Restaurants */}
                 <Link 
                   to="/restaurants" 
-                  className="p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                  className={getNavClass('/restaurants')}
                   title="Restaurants"
                 >
                   <Home className="w-5 h-5" />
@@ -66,7 +77,7 @@ const Navbar = () => {
                   <>
                     <Link 
                       to="/cart" 
-                      className="relative p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                      className={`relative ${getNavClass('/cart')}`}
                       title="Cart"
                     >
                       <ShoppingCart className="w-5 h-5" />
@@ -78,7 +89,7 @@ const Navbar = () => {
                     </Link>
                     <Link 
                       to="/orders" 
-                      className="p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                      className={getNavClass('/orders')}
                       title="Orders"
                     >
                       <Package className="w-5 h-5" />
@@ -90,7 +101,7 @@ const Navbar = () => {
                 {user?.role === 'RESTAURANT_OWNER' && (
                   <Link 
                     to="/dashboard" 
-                    className="p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                    className={getNavClass('/dashboard')}
                     title="Dashboard"
                   >
                     <LayoutDashboard className="w-5 h-5" />
@@ -101,7 +112,7 @@ const Navbar = () => {
                 {user?.role === 'RIDER' && (
                   <Link 
                     to="/rider" 
-                    className="p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                    className={getNavClass('/rider')}
                     title="Rider Dashboard"
                   >
                     <Bike className="w-5 h-5" />
@@ -115,7 +126,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2">
                   <Link 
                     to="/profile" 
-                    className="p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                    className={getNavClass('/profile')}
                     title="Profile"
                   >
                     <User className="w-5 h-5" />
@@ -133,7 +144,7 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/restaurants" 
-                  className="p-3 rounded-full hover:bg-primary-50 text-dark-700 hover:text-primary-600 transition-all duration-200"
+                  className={getNavClass('/restaurants')}
                   title="Restaurants"
                 >
                   <Home className="w-5 h-5" />
