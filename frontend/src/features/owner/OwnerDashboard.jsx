@@ -28,10 +28,11 @@ const OwnerDashboard = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [createRestaurantModalOpen, setCreateRestaurantModalOpen] = useState(false);
   const [editRestaurantModalOpen, setEditRestaurantModalOpen] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
 
   // Redux state
   const { data: restaurant, loading: restaurantLoading } = useSelector(state => state.ownerRestaurant);
-  const { orders, loading: ordersLoading } = useSelector(state => state.ownerOrders);
+  const { orders, loading: ordersLoading, updateLoading } = useSelector(state => state.ownerOrders);
   const { items: menuItems, loading: menuLoading, actionLoading } = useSelector(state => state.menu);
 
   // Fetch data on mount
@@ -60,7 +61,11 @@ const OwnerDashboard = () => {
   };
 
   const handleStatusUpdate = (orderId, newStatus) => {
-    dispatch(updateOrderStatus({ orderId, status: newStatus }));
+    setUpdatingOrderId(orderId);
+    dispatch(updateOrderStatus({ orderId, status: newStatus }))
+      .finally(() => {
+        setUpdatingOrderId(null);
+      });
   };
 
   const handleAddMenuItem = () => {
@@ -158,7 +163,10 @@ const OwnerDashboard = () => {
     return orderDate.toDateString() === today.toDateString();
   });
 
-  const todayRevenue = todayOrders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
+  // Only count revenue from delivered orders
+  const todayRevenue = todayOrders
+    .filter(order => order.status === 'DELIVERED')
+    .reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
   const pendingCount = orders.filter(o => o.status === 'PENDING').length;
 
   const stats = [
@@ -192,9 +200,10 @@ const OwnerDashboard = () => {
     }
   ];
 
-  const loading = restaurantLoading || ordersLoading || menuLoading;
+  // Only show loading for initial page load, not for updates
+  const initialLoading = restaurantLoading || (ordersLoading && orders.length === 0) || menuLoading;
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">Loading...</div>
@@ -456,18 +465,20 @@ const OwnerDashboard = () => {
                             variant="primary"
                             className="w-full justify-center"
                             onClick={() => handleStatusUpdate(order.id, 'PREPARING')}
+                            disabled={updatingOrderId === order.id}
                           >
                             <CheckCircle className="w-5 h-5" />
-                            Accept Order
+                            {updatingOrderId === order.id ? 'Accepting...' : 'Accept Order'}
                           </Button>
                           <Button
                             size="lg"
                             variant="secondary"
                             className="w-full justify-center"
                             onClick={() => handleStatusUpdate(order.id, 'CANCELLED')}
+                            disabled={updatingOrderId === order.id}
                           >
                             <XCircle className="w-5 h-5" />
-                            Reject Order
+                            {updatingOrderId === order.id ? 'Rejecting...' : 'Reject Order'}
                           </Button>
                         </div>
                       )}
@@ -476,9 +487,10 @@ const OwnerDashboard = () => {
                           size="lg"
                           className="w-full justify-center"
                           onClick={() => handleStatusUpdate(order.id, 'READY_FOR_PICKUP')}
+                          disabled={updatingOrderId === order.id}
                         >
                           <CheckCircle className="w-5 h-5" />
-                          Mark Ready
+                          {updatingOrderId === order.id ? 'Updating...' : 'Mark Ready'}
                         </Button>
                       )}
                     </div>
