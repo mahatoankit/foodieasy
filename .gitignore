@@ -11,6 +11,8 @@ BACKEND_INTEGRATION_REPORT.md
 E2E_TEST_REPORT.md
 backend/test_login.py
 backend/management
+
+/docs
 # Python
 __pycache__/
 *.py[cod]
@@ -116,3 +118,5 @@ Thumbs.db
 *.pem
 *.key
 *.cert
+
+backend/tests.py

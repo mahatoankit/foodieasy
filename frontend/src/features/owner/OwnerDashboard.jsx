@@ -384,68 +384,100 @@ const OwnerDashboard = () => {
           ) : (
             <div className="space-y-4">
               {orders.map((order) => (
-                <Card key={order.id} className="hover:shadow-xl transition-all duration-300">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-xl font-bold text-dark-900">Order #{order.id}</h3>
-                        <Badge variant={getStatusColor(order.status)} className="text-sm px-3 py-1">
-                          {order.status}
-                        </Badge>
+                <Card key={order.id} className="hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  {/* Header with Order Number and Status */}
+                  <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary-50 p-2 rounded-lg">
+                        <Package className="w-5 h-5 text-primary-600" />
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-dark-600"><span className="font-medium">Customer:</span> {order.customer?.email || 'Customer'}</p>
-                        <div className="text-dark-700">
-                          <span className="font-medium">Items:</span>
-                          <div className="mt-2 space-y-1">
-                            {order.items && order.items.length > 0 ? (
-                              order.items.map((item) => (
-                                <div key={item.id} className="flex justify-between items-center bg-gray-50 px-3 py-2 rounded">
-                                  <span className="text-sm">
-                                    {item.quantity}× {item.menu_item_name}
-                                  </span>
-                                  <span className="text-sm font-medium text-gray-700">
-                                    NPR {Math.round(item.price_at_order * item.quantity)}
-                                  </span>
-                                </div>
-                              ))
-                            ) : (
-                              <span className="text-sm text-gray-500">No items</span>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-sm text-dark-500">
-                          <span className="font-medium">Time:</span> {new Date(order.created_at).toLocaleString()}
+                      <div>
+                        <h3 className="text-xl font-bold text-dark-900">Order #{order.id}</h3>
+                        <p className="text-sm text-dark-500 mt-0.5">
+                          <Clock className="w-3 h-3 inline mr-1" />
+                          {new Date(order.created_at).toLocaleString()}
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-4">
-                      <p className="text-3xl font-bold text-primary-600">NPR {Math.round(order.total_amount)}</p>
+                    <Badge variant={getStatusColor(order.status)} className="text-sm px-4 py-2 font-semibold">
+                      {order.status}
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-col lg:flex-row gap-6 pt-4">
+                    {/* Left Section - Customer and Items */}
+                    <div className="flex-1 space-y-4">
+                      {/* Customer Info */}
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-sm text-dark-500 mb-1">Customer</p>
+                        <p className="text-base font-semibold text-dark-900">{order.customer_name || 'Unknown Customer'}</p>
+                      </div>
+
+                      {/* Items List */}
+                      <div>
+                        <p className="text-sm font-medium text-dark-700 mb-2">Order Items</p>
+                        <div className="space-y-2">
+                          {order.items && order.items.length > 0 ? (
+                            order.items.map((item) => (
+                              <div key={item.id} className="flex justify-between items-center bg-white border border-gray-200 px-4 py-3 rounded-lg hover:border-primary-300 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <span className="bg-primary-100 text-primary-700 font-bold text-sm px-2.5 py-1 rounded-full">
+                                    {item.quantity}×
+                                  </span>
+                                  <span className="font-medium text-dark-900">
+                                    {item.menu_item_name}
+                                  </span>
+                                </div>
+                                <span className="font-semibold text-dark-900">
+                                  NPR {Math.round(item.price_at_order * item.quantity)}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-sm text-gray-500">No items</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Section - Total and Actions */}
+                    <div className="lg:w-64 flex flex-col justify-between border-l-0 lg:border-l border-gray-200 lg:pl-6">
+                      {/* Total Amount */}
+                      <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-4 text-center mb-4">
+                        <p className="text-sm font-medium text-primary-700 mb-1">Total Amount</p>
+                        <p className="text-4xl font-bold text-primary-600">NPR {Math.round(order.total_amount)}</p>
+                      </div>
+
+                      {/* Action Buttons */}
                       {order.status === 'PENDING' && (
-                        <div className="flex gap-2">
+                        <div className="space-y-2">
                           <Button
-                            size="sm"
+                            size="lg"
                             variant="primary"
+                            className="w-full justify-center"
                             onClick={() => handleStatusUpdate(order.id, 'PREPARING')}
                           >
-                            <CheckCircle className="w-4 h-4" />
-                            Accept
+                            <CheckCircle className="w-5 h-5" />
+                            Accept Order
                           </Button>
                           <Button
-                            size="sm"
+                            size="lg"
                             variant="secondary"
+                            className="w-full justify-center"
                             onClick={() => handleStatusUpdate(order.id, 'CANCELLED')}
                           >
-                            <XCircle className="w-4 h-4" />
-                            Reject
+                            <XCircle className="w-5 h-5" />
+                            Reject Order
                           </Button>
                         </div>
                       )}
                       {order.status === 'PREPARING' && (
                         <Button
-                          size="sm"
+                          size="lg"
+                          className="w-full justify-center"
                           onClick={() => handleStatusUpdate(order.id, 'READY_FOR_PICKUP')}
                         >
+                          <CheckCircle className="w-5 h-5" />
                           Mark Ready
                         </Button>
                       )}
