@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { ArrowLeft, MapPin, Clock, User, Bike, Package, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import axios from 'axios';

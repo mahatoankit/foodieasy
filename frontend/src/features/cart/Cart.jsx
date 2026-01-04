@@ -119,7 +119,7 @@ const Cart = () => {
 
                       {/* Item Total */}
                       <div className="text-xl font-bold text-primary-600">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        NPR{(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -136,21 +136,21 @@ const Cart = () => {
               <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>NPR{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Fee</span>
-                  <span>$2.99</span>
+                  <span>NPR 50</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Service Fee</span>
-                  <span>$1.50</span>
+                  <span>NPR 25</span>
                 </div>
               </div>
 
               <div className="flex justify-between items-center text-xl font-bold text-dark-900 mb-6">
                 <span>Total</span>
-                <span>${(total + 2.99 + 1.50).toFixed(2)}</span>
+                <span>NPR{(total + 50 + 25).toFixed(2)}</span>
               </div>
 
               <Button
@@ -163,7 +163,7 @@ const Cart = () => {
               </Button>
 
               <div className="mt-4 text-center text-sm text-gray-500">
-                <p>Free delivery on orders over $25</p>
+                <p>Free delivery on orders over NPR25</p>
               </div>
             </Card>
           </div>

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Restaurant(models.Model):
@@ -53,6 +54,18 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
     
+    @property
+    def average_rating(self):
+        """Calculate average rating from reviews"""
+        from django.db.models import Avg
+        result = self.reviews.aggregate(Avg('rating'))
+        return round(result['rating__avg'], 1) if result['rating__avg'] else 0
+    
+    @property
+    def review_count(self):
+        """Get total number of reviews"""
+        return self.reviews.count()
+    
     class Meta:
         verbose_name = 'Restaurant'
         verbose_name_plural = 'Restaurants'
@@ -97,7 +110,111 @@ class MenuItem(models.Model):
     def __str__(self):
         return f"{self.name} - {self.restaurant.name}"
     
+    @property
+    def average_rating(self):
+        """Calculate average rating from reviews"""
+        from django.db.models import Avg
+        result = self.reviews.aggregate(Avg('rating'))
+        return round(result['rating__avg'], 1) if result['rating__avg'] else 0
+    
+    @property
+    def review_count(self):
+        """Get total number of reviews"""
+        return self.reviews.count()
+    
     class Meta:
         verbose_name = 'Menu Item'
         verbose_name_plural = 'Menu Items'
         ordering = ['category', 'name']
+
+
+class RestaurantReview(models.Model):
+    """
+    Restaurant review model - customers can review restaurants they've ordered from.
+    """
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='restaurant_reviews',
+        limit_choices_to={'role': 'CUSTOMER'}
+    )
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name='Rating (1-5 stars)'
+    )
+    comment = models.TextField(
+        blank=True,
+        verbose_name='Review Comment'
+    )
+    is_verified_purchase = models.BooleanField(
+        default=False,
+        verbose_name='Verified Purchase',
+        help_text='User has completed at least one order from this restaurant'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Restaurant Review'
+        verbose_name_plural = 'Restaurant Reviews'
+        ordering = ['-created_at']
+        unique_together = ['restaurant', 'user']  # One review per user per restaurant
+        indexes = [
+            models.Index(fields=['restaurant', '-created_at']),
+            models.Index(fields=['user']),
+            models.Index(fields=['rating']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.restaurant.name} ({self.rating}★)"
+
+
+class MenuItemReview(models.Model):
+    """
+    Menu item review model - customers can review specific menu items they've ordered.
+    """
+    menu_item = models.ForeignKey(
+        MenuItem,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='menu_item_reviews',
+        limit_choices_to={'role': 'CUSTOMER'}
+    )
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name='Rating (1-5 stars)'
+    )
+    comment = models.TextField(
+        blank=True,
+        verbose_name='Review Comment'
+    )
+    is_verified_purchase = models.BooleanField(
+        default=False,
+        verbose_name='Verified Purchase',
+        help_text='User has ordered this specific menu item'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Menu Item Review'
+        verbose_name_plural = 'Menu Item Reviews'
+        ordering = ['-created_at']
+        unique_together = ['menu_item', 'user']  # One review per user per menu item
+        indexes = [
+            models.Index(fields=['menu_item', '-created_at']),
+            models.Index(fields=['user']),
+            models.Index(fields=['rating']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.menu_item.name} ({self.rating}★)"

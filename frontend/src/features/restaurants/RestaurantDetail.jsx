@@ -8,6 +8,8 @@ import { ArrowLeft, MapPin, Clock, Star, Plus, X } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import { StarRating, ReviewList, ReviewForm } from '../../components/reviews';
+import { canReviewRestaurant } from '../../services/reviewService';
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -17,10 +19,29 @@ const RestaurantDetail = () => {
   const { user } = useSelector((state) => state.auth);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [canReview, setCanReview] = useState({ can_review: false, already_reviewed: false, has_ordered: false });
+  const [refreshReviews, setRefreshReviews] = useState(false);
 
   useEffect(() => {
     dispatch(fetchRestaurantById(id));
   }, [dispatch, id]);
+
+  useEffect(() => {
+    // Check if user can review this restaurant
+    const checkReviewEligibility = async () => {
+      if (user && user.role === 'CUSTOMER' && id) {
+        try {
+          const result = await canReviewRestaurant(id);
+          setCanReview(result);
+        } catch (error) {
+          console.error('Error checking review eligibility:', error);
+        }
+      }
+    };
+
+    checkReviewEligibility();
+  }, [user, id, refreshReviews]);
 
   const handleAddToCart = (menuItem) => {
     if (!user) {
@@ -104,9 +125,8 @@ const RestaurantDetail = () => {
             <div className="flex items-center gap-4 text-gray-600 mb-4">
               <Badge variant="secondary">{restaurant.cuisine_type}</Badge>
               <div className="flex items-center gap-1">
-                <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">4.5</span>
-                <span className="text-sm">(120+ reviews)</span>
+                <StarRating rating={restaurant.average_rating || 0} size={16} showNumber />
+                <span className="text-sm">({restaurant.review_count || 0} reviews)</span>
               </div>
             </div>
             <p className="text-gray-700 mb-4">{restaurant.description}</p>
@@ -256,6 +276,71 @@ const RestaurantDetail = () => {
         )}
       </div>
 
+      {/* Reviews Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <Card className="p-6">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-3xl font-bold text-dark-900">Customer Reviews</h2>
+                <div className="flex items-center gap-3 mt-2">
+                  <StarRating rating={restaurant.average_rating || 0} size={24} showNumber />
+                  <span className="text-gray-600">
+                    ({restaurant.review_count || 0} {restaurant.review_count === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              </div>
+              
+              {/* Write Review Button */}
+              {user && user.role === 'CUSTOMER' && (
+                <div>
+                  {canReview.can_review && !showReviewForm && (
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowReviewForm(true)}
+                      icon={<Star size={18} />}
+                    >
+                      Write a Review
+                    </Button>
+                  )}
+                  {canReview.already_reviewed && (
+                    <Badge variant="success">You've reviewed this restaurant</Badge>
+                  )}
+                  {!canReview.has_ordered && user.role === 'CUSTOMER' && (
+                    <p className="text-sm text-gray-600">
+                      Order from this restaurant to leave a review
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Review Form */}
+            {showReviewForm && (
+              <div className="mb-6">
+                <ReviewForm
+                  type="restaurant"
+                  targetId={parseInt(id)}
+                  onSuccess={() => {
+                    setShowReviewForm(false);
+                    setRefreshReviews(!refreshReviews);
+                    toast.success('Review submitted successfully!');
+                  }}
+                  onCancel={() => setShowReviewForm(false)}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Reviews List */}
+          <ReviewList
+            type="restaurant"
+            targetId={parseInt(id)}
+            refresh={refreshReviews}
+          />
+        </Card>
+      </div>
+
       {/* Menu Item Details Modal */}
       {selectedMenuItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -316,6 +401,19 @@ const RestaurantDetail = () => {
                   {selectedMenuItem.description}
                 </p>
               </div>
+
+              {/* Rating Section */}
+              {selectedMenuItem.average_rating > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-lg font-semibold text-dark-900">Rating</h3>
+                    <StarRating rating={selectedMenuItem.average_rating} size={18} showNumber />
+                    <span className="text-sm text-gray-600">
+                      ({selectedMenuItem.review_count} {selectedMenuItem.review_count === 1 ? 'review' : 'reviews'})
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Additional Info */}
               <div className="mb-6 grid grid-cols-2 gap-4">

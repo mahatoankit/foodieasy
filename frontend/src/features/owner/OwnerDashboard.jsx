@@ -32,7 +32,7 @@ const OwnerDashboard = () => {
 
   // Redux state
   const { data: restaurant, loading: restaurantLoading } = useSelector(state => state.ownerRestaurant);
-  const { orders, loading: ordersLoading, updateLoading } = useSelector(state => state.ownerOrders);
+  const { orders, loading: ordersLoading } = useSelector(state => state.ownerOrders);
   const { items: menuItems, loading: menuLoading, actionLoading } = useSelector(state => state.menu);
 
   // Fetch data on mount

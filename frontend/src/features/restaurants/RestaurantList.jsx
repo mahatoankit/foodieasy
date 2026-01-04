@@ -6,7 +6,7 @@ import { fetchRestaurants } from './restaurantSlice';
 import SearchBar from '../../components/ui/SearchBar';
 import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
-import Rating from '../../components/ui/Rating';
+import { StarRating } from '../../components/reviews';
 
 const RestaurantList = () => {
   const dispatch = useDispatch();
@@ -172,8 +172,10 @@ const RestaurantList = () => {
                         {restaurant.name}
                       </h3>
                       <div className="flex items-center gap-2">
-                        <Rating value={4.5} size="sm" />
-                        <span className="text-white text-sm font-medium drop-shadow">(120+ ratings)</span>
+                        <StarRating rating={restaurant.average_rating || 0} size={16} />
+                        <span className="text-white text-sm font-medium drop-shadow">
+                          ({restaurant.review_count || 0} {restaurant.review_count === 1 ? 'review' : 'reviews'})
+                        </span>
                       </div>
                     </div>
                   </div>

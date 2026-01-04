@@ -3,13 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Restaurant, MenuItem
+from .models import Restaurant, MenuItem, RestaurantReview, MenuItemReview
 from .serializers import (
     RestaurantSerializer,
     RestaurantListSerializer,
     RestaurantCreateSerializer,
     MenuItemSerializer,
-    MenuItemCreateSerializer
+    MenuItemCreateSerializer,
+    RestaurantReviewSerializer,
+    MenuItemReviewSerializer
 )
 from .permissions import IsRestaurantOwner, IsRestaurantOwnerOrReadOnly
 
@@ -150,3 +152,192 @@ class MenuItemViewSet(viewsets.ModelViewSet):
                 {'detail': 'You do not have a restaurant yet.'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class RestaurantReviewViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Restaurant Review operations.
+    
+    list: Get all reviews (filterable by restaurant)
+    retrieve: Get single review
+    create: Create review (authenticated customers only)
+    update: Update own review
+    destroy: Delete own review
+    """
+    queryset = RestaurantReview.objects.all().select_related('restaurant', 'user')
+    serializer_class = RestaurantReviewSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['restaurant', 'rating', 'is_verified_purchase']
+    ordering_fields = ['created_at', 'rating']
+    ordering = ['-created_at']
+    
+    def get_permissions(self):
+        """Set permissions based on action"""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+    
+    def get_queryset(self):
+        """Filter queryset based on query params"""
+        queryset = super().get_queryset()
+        
+        # Filter by restaurant_id if provided
+        restaurant_id = self.request.query_params.get('restaurant_id', None)
+        if restaurant_id:
+            queryset = queryset.filter(restaurant_id=restaurant_id)
+        
+        # Filter by user if requested (only show own reviews)
+        if self.request.query_params.get('my_reviews') == 'true' and self.request.user.is_authenticated:
+            queryset = queryset.filter(user=self.request.user)
+        
+        return queryset
+    
+    def perform_update(self, serializer):
+        """Only allow users to update their own reviews"""
+        if serializer.instance.user != self.request.user:
+            raise PermissionError('You can only update your own reviews.')
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        """Only allow users to delete their own reviews"""
+        if instance.user != self.request.user:
+            raise PermissionError('You can only delete your own reviews.')
+        instance.delete()
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_reviews(self, request):
+        """
+        Get all reviews by the current user.
+        
+        GET /api/restaurant-reviews/my_reviews/
+        """
+        reviews = RestaurantReview.objects.filter(user=request.user)
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='can-review/(?P<restaurant_id>[^/.]+)')
+    def can_review(self, request, restaurant_id=None):
+        """
+        Check if the current user can review a restaurant.
+        
+        GET /api/restaurant-reviews/can-review/{restaurant_id}/
+        """
+        from orders.models import Order
+        
+        # Check if user has already reviewed
+        already_reviewed = RestaurantReview.objects.filter(
+            user=request.user,
+            restaurant_id=restaurant_id
+        ).exists()
+        
+        # Check if user has ordered from this restaurant
+        has_ordered = Order.objects.filter(
+            customer=request.user,
+            restaurant_id=restaurant_id,
+            status='DELIVERED'
+        ).exists()
+        
+        return Response({
+            'can_review': has_ordered and not already_reviewed,
+            'already_reviewed': already_reviewed,
+            'has_ordered': has_ordered
+        })
+
+
+class MenuItemReviewViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Menu Item Review operations.
+    
+    list: Get all reviews (filterable by menu item)
+    retrieve: Get single review
+    create: Create review (authenticated customers only)
+    update: Update own review
+    destroy: Delete own review
+    """
+    queryset = MenuItemReview.objects.all().select_related('menu_item', 'user', 'menu_item__restaurant')
+    serializer_class = MenuItemReviewSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['menu_item', 'rating', 'is_verified_purchase']
+    ordering_fields = ['created_at', 'rating']
+    ordering = ['-created_at']
+    
+    def get_permissions(self):
+        """Set permissions based on action"""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+    
+    def get_queryset(self):
+        """Filter queryset based on query params"""
+        queryset = super().get_queryset()
+        
+        # Filter by menu_item_id if provided
+        menu_item_id = self.request.query_params.get('menu_item_id', None)
+        if menu_item_id:
+            queryset = queryset.filter(menu_item_id=menu_item_id)
+        
+        # Filter by restaurant_id if provided
+        restaurant_id = self.request.query_params.get('restaurant_id', None)
+        if restaurant_id:
+            queryset = queryset.filter(menu_item__restaurant_id=restaurant_id)
+        
+        # Filter by user if requested (only show own reviews)
+        if self.request.query_params.get('my_reviews') == 'true' and self.request.user.is_authenticated:
+            queryset = queryset.filter(user=self.request.user)
+        
+        return queryset
+    
+    def perform_update(self, serializer):
+        """Only allow users to update their own reviews"""
+        if serializer.instance.user != self.request.user:
+            raise PermissionError('You can only update your own reviews.')
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        """Only allow users to delete their own reviews"""
+        if instance.user != self.request.user:
+            raise PermissionError('You can only delete your own reviews.')
+        instance.delete()
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_reviews(self, request):
+        """
+        Get all reviews by the current user.
+        
+        GET /api/menu-item-reviews/my_reviews/
+        """
+        reviews = MenuItemReview.objects.filter(user=request.user)
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='can-review/(?P<menu_item_id>[^/.]+)')
+    def can_review(self, request, menu_item_id=None):
+        """
+        Check if the current user can review a menu item.
+        
+        GET /api/menu-item-reviews/can-review/{menu_item_id}/
+        """
+        from orders.models import OrderItem
+        
+        # Check if user has already reviewed
+        already_reviewed = MenuItemReview.objects.filter(
+            user=request.user,
+            menu_item_id=menu_item_id
+        ).exists()
+        
+        # Check if user has ordered this menu item
+        has_ordered = OrderItem.objects.filter(
+            order__customer=request.user,
+            menu_item_id=menu_item_id,
+            order__status='DELIVERED'
+        ).exists()
+        
+        return Response({
+            'can_review': has_ordered and not already_reviewed,
+            'already_reviewed': already_reviewed,
+            'has_ordered': has_ordered
+        })

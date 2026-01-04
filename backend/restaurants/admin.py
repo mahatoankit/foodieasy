@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Restaurant, MenuItem
+from .models import Restaurant, MenuItem, RestaurantReview, MenuItemReview
 
 
 class MenuItemInline(admin.TabularInline):
@@ -45,5 +45,49 @@ class MenuItemAdmin(admin.ModelAdmin):
         }),
         ('Pricing & Category', {
             'fields': ('price', 'category', 'is_available')
+        }),
+    )
+
+
+@admin.register(RestaurantReview)
+class RestaurantReviewAdmin(admin.ModelAdmin):
+    """Admin configuration for RestaurantReview"""
+    list_display = ['restaurant', 'user', 'rating', 'is_verified_purchase', 'created_at']
+    list_filter = ['rating', 'is_verified_purchase', 'created_at']
+    search_fields = ['restaurant__name', 'user__email', 'comment']
+    ordering = ['-created_at']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Review Information', {
+            'fields': ('restaurant', 'user', 'rating', 'comment')
+        }),
+        ('Verification', {
+            'fields': ('is_verified_purchase',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+
+
+@admin.register(MenuItemReview)
+class MenuItemReviewAdmin(admin.ModelAdmin):
+    """Admin configuration for MenuItemReview"""
+    list_display = ['menu_item', 'user', 'rating', 'is_verified_purchase', 'created_at']
+    list_filter = ['rating', 'is_verified_purchase', 'created_at']
+    search_fields = ['menu_item__name', 'user__email', 'comment']
+    ordering = ['-created_at']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Review Information', {
+            'fields': ('menu_item', 'user', 'rating', 'comment')
+        }),
+        ('Verification', {
+            'fields': ('is_verified_purchase',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at')
         }),
     )
